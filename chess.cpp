@@ -4,11 +4,13 @@
 #include<string.h>
 #include<math.h>
 #include<time.h>
+//学生后加的
+#include<vector>//因为老师允许使用stl
 
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
-
+int currentSize;//记录每次走法生成的个数
 struct Point{ //点结构
 	int x,y;
 };
@@ -17,6 +19,7 @@ struct Step{ //步结构
 	int value;
 };
 int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
+std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
 
 int main()
 {
