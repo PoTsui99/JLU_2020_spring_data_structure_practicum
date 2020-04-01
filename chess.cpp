@@ -20,6 +20,33 @@ struct Step{ //步结构
 };
 int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
+bool hasNeighbor(int x, int y){
+	int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
+	int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
+	for(int i  = 0; i < 7; i++)
+		for(int  j = 1; j < 7; j++)
+			if (Board[x + direction_x[i]][y + direction_y[j]] != 2)
+				return true;
+	for(int  i = 1; i < 7; i++)
+			if (Board[x + direction_x[i]][y] != 2)
+				return true;
+	return false;
+}
+int getValue(int x, int y, int computerSide){
+
+}
+void generateMove(int computerSide){
+	currentSize = 0;
+	for(int i  = 0; i < 19; i++)
+		for(int  j = 1; j < 19; j++){
+				
+
+		}
+	
+}
+
+
+
 
 int main()
 {
