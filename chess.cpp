@@ -5,7 +5,8 @@
 #include<math.h>
 #include<time.h>
 //学生后加的
-#include<vector>//因为老师允许使用stl
+#include<bits/stdc++.h> // 万能头文件
+#include<vector> // 因为老师允许使用stl
 
 #define BLACK 0
 #define WHITE 1
