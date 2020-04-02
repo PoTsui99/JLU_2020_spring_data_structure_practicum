@@ -6,6 +6,7 @@
 #include<time.h>
 //学生后加的
 #include<vector> // 因为老师允许使用stl
+#include<algorithm>
 
 #define BLACK 0
 #define WHITE 1
@@ -14,12 +15,17 @@ int currentSize;//记录每次走法生成的个数
 struct Point{ //点结构
 	int x,y;
 };
+struct Point_1{ //点结构
+	int x,y;
+	int score;
+};
 struct Step{ //步结构
 	Point first,second;
 	int value;
 };
 int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
+std::vector<Point_1> validCondition;//存储可以走的棋点
 bool hasNeighbor(int x, int y){
 	int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
 	int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
@@ -32,17 +38,53 @@ bool hasNeighbor(int x, int y){
 				return true;
 	return false;
 }
+
 int getValue(int x, int y, int computerSide){
 
 }
+
+bool SortByM1( const Step &v1, const Step &v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致
+{
+    return v1.value < v2.value;//升序排列
+}
+
 void generateMove(int computerSide){
+	std::vector<Step>::iterator it;
+	std::vector<Point_1>::iterator it_1;
+    for (it = moveCondition.begin(); it != moveCondition.end(); ){
+        it = moveCondition.erase(it);
+    }
+	for (it_1 = validCondition.begin(); it_1 != validCondition.end(); ){
+        it_1 = validCondition.erase(it_1);
+    }
 	currentSize = 0;
+	//寻找可以下的点
 	for(int i  = 0; i < 19; i++)
 		for(int  j = 1; j < 19; j++){
-				
-
+				if (Board[i][j] == 2){
+					if(hasNeighbor(i, j)){
+						int temp = getValue(i, j, computerSide);
+						Point_1 temp_struct;
+						temp_struct.x = i;
+						temp_struct.y = j;
+						temp_struct.score = temp;
+						validCondition.push_back(temp_struct);
+					}
+				}
 		}
-	
+	//将可以下的点组合，要将两步映射为一步
+	for(int i  = 0; i < validCondition.size; i++)
+		for(int  j = i + 1; j < validCondition.size; j++){
+			Step temp;
+			temp.first.x = validCondition[i].x;
+			temp.first.y = validCondition[i].y;
+			temp.second.x = validCondition[j].x;
+			temp.second.y = validCondition[j].y;
+			temp.value = validCondition[i].score + validCondition[j].score;
+			moveCondition.push_back(temp);
+		}
+	//将moveCondition里面的元素按评估分数升序排列
+	std::sort(moveCondition.begin(),moveCondition.end(),SortByM1);
 }
 
 
