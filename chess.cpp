@@ -43,7 +43,7 @@ int getValue(int x, int y, int computerSide){
 
 }
 
-bool SortByM1( const Step &v1, const Step &v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致
+bool sortByM1( const Step &v1, const Step &v2)//注意：本函数的参数的类型一定要与vector中元素的类型一致
 {
     return v1.value < v2.value;//升序排列
 }
@@ -84,7 +84,7 @@ void generateMove(int computerSide){
 			moveCondition.push_back(temp);
 		}
 	//将moveCondition里面的元素按评估分数升序排列
-	std::sort(moveCondition.begin(),moveCondition.end(),SortByM1);
+	std::sort(moveCondition.begin(),moveCondition.end(),sortByM1);
 }
 
 
