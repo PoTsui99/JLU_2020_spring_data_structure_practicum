@@ -63,7 +63,7 @@ void generateMove(int computerSide){
 	//寻找可以下的点
 	for(int i  = 0; i < 19; i++)
 		for(int  j = 1; j < 19; j++){
-				if (Board[i][j] == 2){
+				if (simuBoard[i][j] == 2){
 					if(hasNeighbor(i, j)){
 						int temp = getValue(i, j, computerSide);
 						Point_1 temp_struct;
