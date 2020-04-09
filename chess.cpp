@@ -24,7 +24,6 @@ struct Step{ //步结构
 	int value;
 };
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
-int simuBoard[19][19]; //模拟的棋盘,建议在走法函数中替换Board(Board作为默认初值)
 std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
 std::vector<Point_1> validCondition;//存储可以走的棋点
 bool hasNeighbor(int x, int y){
