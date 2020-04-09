@@ -1,31 +1,31 @@
-//¹ú±ê²»ÏãÂğ
+//å›½æ ‡ä¸é¦™å—
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
 #include<time.h>
-//Ñ§Éúºó¼ÓµÄ
-#include<vector> // ÒòÎªÀÏÊ¦ÔÊĞíÊ¹ÓÃstl
+//å­¦ç”ŸååŠ çš„
+#include<vector> // å› ä¸ºè€å¸ˆå…è®¸ä½¿ç”¨stl
 #include<algorithm>
 
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
-int currentSize;//¼ÇÂ¼Ã¿´Î×ß·¨Éú³ÉµÄ¸öÊı
-struct Point{ //µã½á¹¹
+int currentSize;//è®°å½•æ¯æ¬¡èµ°æ³•ç”Ÿæˆçš„ä¸ªæ•°
+struct Point{ //ç‚¹ç»“æ„
 	int x,y;
 };
-struct Point_1{ //µã½á¹¹
+struct Point_1{ //ç‚¹ç»“æ„
 	int x,y;
 	int score;
 };
-struct Step{ //²½½á¹¹
+struct Step{ //æ­¥ç»“æ„
 	Point first,second;
 	int value;
 };
-int Board[19][19]; //´æ´¢ÆåÅÌĞÅÏ¢£¬ÆäÔªËØÖµÎª BLACK, WHITE, EMPTY Ö®Ò»
-std::vector<Step> moveCondition;//´æ´¢ºÏ·¨µÄ×ß·¨£¬ÓĞĞ§ÔªËØ¸öÊıÓĞcurrentSize¼ÇÂ¼
-std::vector<Point_1> validCondition;//´æ´¢¿ÉÒÔ×ßµÄÆåµã
+int Board[19][19]; //å­˜å‚¨æ£‹ç›˜ä¿¡æ¯ï¼Œå…¶å…ƒç´ å€¼ä¸º BLACK, WHITE, EMPTY ä¹‹ä¸€
+std::vector<Step> moveCondition;//å­˜å‚¨åˆæ³•çš„èµ°æ³•ï¼Œæœ‰æ•ˆå…ƒç´ ä¸ªæ•°æœ‰currentSizeè®°å½•
+std::vector<Point_1> validCondition;//å­˜å‚¨å¯ä»¥èµ°çš„æ£‹ç‚¹
 bool hasNeighbor(int x, int y){
 	int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
 	int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
@@ -43,12 +43,12 @@ int getValue(int x, int y, int computerSide){
 
 }
 
-bool sortByM1( const Step &v1, const Step &v2)//×¢Òâ£º±¾º¯ÊıµÄ²ÎÊıµÄÀàĞÍÒ»¶¨ÒªÓëvectorÖĞÔªËØµÄÀàĞÍÒ»ÖÂ
+bool sortByM1( const Step &v1, const Step &v2)//æ³¨æ„ï¼šæœ¬å‡½æ•°çš„å‚æ•°çš„ç±»å‹ä¸€å®šè¦ä¸vectorä¸­å…ƒç´ çš„ç±»å‹ä¸€è‡´
 {
-    return v1.value < v2.value;//ÉıĞòÅÅÁĞ
+    return v1.value < v2.value;//å‡åºæ’åˆ—
 }
 
-// Á½²½µÄ
+// ä¸¤æ­¥çš„
 void generateMove(int computerSide){
 	std::vector<Step>::iterator it;
 	std::vector<Point_1>::iterator it_1;
@@ -59,7 +59,7 @@ void generateMove(int computerSide){
         it_1 = validCondition.erase(it_1);
     }
 	currentSize = 0;
-	//Ñ°ÕÒ¿ÉÒÔÏÂµÄµã
+	//å¯»æ‰¾å¯ä»¥ä¸‹çš„ç‚¹
 	for(int i  = 0; i < 19; i++)
 		for(int  j = 1; j < 19; j++){
 				if (Board[i][j] == 2){
@@ -73,7 +73,7 @@ void generateMove(int computerSide){
 					}
 				}
 		}
-	//½«¿ÉÒÔÏÂµÄµã×éºÏ£¬Òª½«Á½²½Ó³ÉäÎªÒ»²½
+	//å°†å¯ä»¥ä¸‹çš„ç‚¹ç»„åˆï¼Œè¦å°†ä¸¤æ­¥æ˜ å°„ä¸ºä¸€æ­¥
 	for(int i  = 0; i < validCondition.size(); i++)
 		for(int  j = i + 1; j < validCondition.size(); j++){
 			Step temp;
@@ -84,77 +84,77 @@ void generateMove(int computerSide){
 			temp.value = validCondition[i].score + validCondition[j].score;
 			moveCondition.push_back(temp);
 		}
-	//½«moveConditionÀïÃæµÄÔªËØ°´ÆÀ¹À·ÖÊıÉıĞòÅÅÁĞ
+	//å°†moveConditioné‡Œé¢çš„å…ƒç´ æŒ‰è¯„ä¼°åˆ†æ•°å‡åºæ’åˆ—
 	std::sort(moveCondition.begin(),moveCondition.end(),sortByM1);
 }
 
 
 int main()
 {
-	Step step;//ÁÙÊ±²½½á¹¹
-	char message[256];//Í¨ĞÅÏûÏ¢»º³å
-    int computerSide;//¼º·½Ö´ÆåÑÕÉ«
-    int start=0;//¶Ô¾Ö¿ªÊ¼±ê¼Ç
+	Step step;//ä¸´æ—¶æ­¥ç»“æ„
+	char message[256];//é€šä¿¡æ¶ˆæ¯ç¼“å†²
+    int computerSide;//å·±æ–¹æ‰§æ£‹é¢œè‰²
+    int start=0;//å¯¹å±€å¼€å§‹æ ‡è®°
 	srand(int(time(0)));
-	//´Ë´¦·ÅÖÃ³õÊ¼»¯´úÂë
+	//æ­¤å¤„æ”¾ç½®åˆå§‹åŒ–ä»£ç 
     //...
     
-	while (1)	//³ÌĞòÖ÷Ñ­»·
+	while (1)	//ç¨‹åºä¸»å¾ªç¯
 	{
-		fflush(stdout);//²»ÒªÉ¾³ı´ËÓï¾ä£¬·ñÔò³ÌĞò»á³öÎÊÌâ
-		scanf("%s", message);//»ñÈ¡Æ½Ì¨ÃüÁîÏûÏ¢
-        //·ÖÎöÃüÁî
-		if (strcmp(message, "name?") == 0)//Ïò¶ÔÕ½Æ½Ì¨·¢ËÍ¶ÓÃû
+		fflush(stdout);//ä¸è¦åˆ é™¤æ­¤è¯­å¥ï¼Œå¦åˆ™ç¨‹åºä¼šå‡ºé—®é¢˜
+		scanf("%s", message);//è·å–å¹³å°å‘½ä»¤æ¶ˆæ¯
+        //åˆ†æå‘½ä»¤
+		if (strcmp(message, "name?") == 0)//å‘å¯¹æˆ˜å¹³å°å‘é€é˜Ÿå
 		{
 			fflush(stdin);
-			/***********½«"Áîºü³å"¸ÄÎªÄãµÄ¶ÓÃû£¬²»³¬¹ı6¸öºº×Ö»ò12¸öÓ¢ÎÄ×ÖÄ¸£¬·ñÔòÎŞ³É¼¨************/
-			/*******/		printf("name Eureka\n");		/**Ö»ĞŞ¸ÄÁîºü³å£¬²»ÒªÉ¾³ıname¿Õ¸ñ****/
-			/***********½«"Áîºü³å"¸ÄÎªÄãµÄ¶ÓÃû£¬²»³¬¹ı6¸öºº×Ö»ò12¸öÓ¢ÎÄ×ÖÄ¸£¬·ñÔòÎŞ³É¼¨************/
+			/***********å°†"ä»¤ç‹å†²"æ”¹ä¸ºä½ çš„é˜Ÿåï¼Œä¸è¶…è¿‡6ä¸ªæ±‰å­—æˆ–12ä¸ªè‹±æ–‡å­—æ¯ï¼Œå¦åˆ™æ— æˆç»©************/
+			/*******/		printf("name Eureka\n");		/**åªä¿®æ”¹ä»¤ç‹å†²ï¼Œä¸è¦åˆ é™¤nameç©ºæ ¼****/
+			/***********å°†"ä»¤ç‹å†²"æ”¹ä¸ºä½ çš„é˜Ÿåï¼Œä¸è¶…è¿‡6ä¸ªæ±‰å­—æˆ–12ä¸ªè‹±æ–‡å­—æ¯ï¼Œå¦åˆ™æ— æˆç»©************/
 		}
-		else if (strcmp(message, "new") == 0)//½¨Á¢ĞÂÆå¾Ö
+		else if (strcmp(message, "new") == 0)//å»ºç«‹æ–°æ£‹å±€,ä¸‹å…ˆæ‰‹æ£‹
 		{
 			int i, j;
-			scanf("%s", message);//»ñÈ¡¼º·½Ö´ÆåÑÕÉ«
+			scanf("%s", message);//è·å–å·±æ–¹æ‰§æ£‹é¢œè‰²
 			fflush(stdin);
-			if (strcmp(message, "black") == 0)	computerSide = BLACK;  //Ö´ºÚ
-			else  computerSide = WHITE;   //Ö´°×
+			if (strcmp(message, "black") == 0)	computerSide = BLACK;  //æ‰§é»‘
+			else  computerSide = WHITE;   //æ‰§ç™½
 
-			for (i = 0; i<19; ++i)   //³õÊ¼»¯Æå¾Ö
+			for (i = 0; i<19; ++i)   //åˆå§‹åŒ–æ£‹å±€
 				for (j = 0; j<19; ++j)
 					Board[i][j] = EMPTY;
 			start = 1;
 
 			if (computerSide == BLACK)
 			{
-				/**********Éú³ÉµÚÒ»ÊÖ×Å·¨£¬²¢±£´æÔÚstep½á¹¹ÖĞ£¬Âä×Ó×ø±êÎª(step.first.x,step.first.y)**********/
-				/****************************ÔÚÏÂ·½Ìî³ä´úÂë£¬²¢Ìæ»»ÎÒµÄÊ¾Àı´úÂë******************************/
+				/**********ç”Ÿæˆç¬¬ä¸€æ‰‹ç€æ³•ï¼Œå¹¶ä¿å­˜åœ¨stepç»“æ„ä¸­ï¼Œè½å­åæ ‡ä¸º(step.first.x,step.first.y)**********/
+				/****************************åœ¨ä¸‹æ–¹å¡«å……ä»£ç ï¼Œå¹¶æ›¿æ¢æˆ‘çš„ç¤ºä¾‹ä»£ç ******************************/
 
-				// µÚÒ»²½Âä×ÓÆäÊµÃ»É¶ºÃ»»µÄ,Ö±½ÓÊÖ¶¯ÓÅ»¯
+				// ç¬¬ä¸€æ­¥è½å­å…¶å®æ²¡å•¥å¥½æ¢çš„,ç›´æ¥æ‰‹åŠ¨ä¼˜åŒ–
 				step.first.x = 9;
 				step.first.y = 9;
 
 
-				/******************************ÔÚÉÏÃæÌî³äµÚÒ»²½ĞĞÆå´úÂë*******************************************/
+				/******************************åœ¨ä¸Šé¢å¡«å……ç¬¬ä¸€æ­¥è¡Œæ£‹ä»£ç *******************************************/
 
-				Board[step.first.x][step.first.y] = computerSide;//´¦Àí¼º·½ĞĞÆå
-				printf("move %c%c@@\n", step.first.x + 'A', step.first.y + 'A');//Êä³ö×Å·¨
+				Board[step.first.x][step.first.y] = computerSide;//å¤„ç†å·±æ–¹è¡Œæ£‹
+				printf("move %c%c@@\n", step.first.x + 'A', step.first.y + 'A');//è¾“å‡ºç€æ³•
 			}
 		}
-		else if(strcmp(message,"move")==0)//ĞĞÆå,±¾³ÌĞòºËĞÄ
+		else if(strcmp(message,"move")==0)//è¡Œæ£‹,æœ¬ç¨‹åºæ ¸å¿ƒ,æ­£å¸¸ä¸‹æ£‹
 		{
-			scanf("%s", message);//»ñÈ¡¶ÔÊÖĞĞÆå×Å·¨
+			scanf("%s", message);//è·å–å¯¹æ‰‹è¡Œæ£‹ç€æ³•
             fflush(stdin); 
 			step.first.x=message[0]-'A';		step.first.y=message[1]-'A';
 			step.second.x=message[2]-'A';		step.second.y=message[3]-'A';
-            //´¦Àí¶ÔÊÖĞĞÆå
+            //å¤„ç†å¯¹æ‰‹è¡Œæ£‹
 			Board[step.first.x][step.first.y] = 1 - computerSide;
 			if(!(step.second.x==-1 && step.second.y==-1)) Board[step.second.x][step.second.y] = 1 - computerSide;
 
             /**********************************************************************************************************/
-			/***Éú³ÉÂä×ÓµÄ×ø±ê£¬±£´æÔÚstep½á¹¹ÖĞ£¬µÚ1×ÓÏÂÔÚ(step.first.x,step.first.y)£¬µÚ2×ÓÏÂÔÚ(step.first.x,step.first.y)*****/
-			/**************************************ÔÚÏÂ·½Ìî³ä´úÂë£¬²¢Ìæ»»ÎÒµÄÊ¾Àı´úÂë*****************************************/
+			/***ç”Ÿæˆè½å­çš„åæ ‡ï¼Œä¿å­˜åœ¨stepç»“æ„ä¸­ï¼Œç¬¬1å­ä¸‹åœ¨(step.first.x,step.first.y)ï¼Œç¬¬2å­ä¸‹åœ¨(step.first.x,step.first.y)*****/
+			/**************************************åœ¨ä¸‹æ–¹å¡«å……ä»£ç ï¼Œå¹¶æ›¿æ¢æˆ‘çš„ç¤ºä¾‹ä»£ç *****************************************/
 			
-			//Éú³ÉµÚ1×ÓÂä×ÓÎ»ÖÃstep.first.xºÍstep.first.y
+			//ç”Ÿæˆç¬¬1å­è½å­ä½ç½®step.first.xå’Œstep.first.y
 			int x, y;
 			x = rand() % 19; y = rand() % 19;
 			while (Board[x][y] != EMPTY)
@@ -165,7 +165,7 @@ int main()
 			step.first.y = y;
 			Board[step.first.x][step.first.y] = computerSide;
 
-			//Éú³ÉµÚ2×ÓÂä×ÓÎ»ÖÃstep.second.xºÍstep.second.y	
+			//ç”Ÿæˆç¬¬2å­è½å­ä½ç½®step.second.xå’Œstep.second.y	
 			x = rand() % 19;	y = rand() % 19;
 			while (Board[x][y] != EMPTY)
 			{
@@ -175,21 +175,21 @@ int main()
 			step.second.y = y;
 			Board[step.second.x][step.second.y] = computerSide;
 			
-			/*****************************************ÔÚÉÏÃæÌî³ä´úÂë******************************************************/
+			/*****************************************åœ¨ä¸Šé¢å¡«å……ä»£ç ******************************************************/
 			/**********************************************************************************************************/
 
-			printf("move %c%c%c%c\n",step.first.x+'A',step.first.y+'A',step.second.x+'A',step.second.y+'A');//Êä³ö×Å·¨
+			printf("move %c%c%c%c\n",step.first.x+'A',step.first.y+'A',step.second.x+'A',step.second.y+'A');//è¾“å‡ºç€æ³•
 		}
-        else if (strcmp(message, "error") == 0)//×Å·¨´íÎó
+        else if (strcmp(message, "error") == 0)//ç€æ³•é”™è¯¯
         {
             fflush(stdin);
         }
-		else if (strcmp(message, "end") == 0)//¶Ô¾Ö½áÊø
+		else if (strcmp(message, "end") == 0)//å¯¹å±€ç»“æŸ
 		{
             fflush(stdin);
 			start = 0;
 		}
-		else if (strcmp(message, "quit") == 0)//ÍË³öÒıÇæ
+		else if (strcmp(message, "quit") == 0)//é€€å‡ºå¼•æ“
 		{
             fflush(stdin);
 			printf("Quit!\n");
@@ -198,3 +198,5 @@ int main()
 	}
 	return 0;
 }
+
+ 
