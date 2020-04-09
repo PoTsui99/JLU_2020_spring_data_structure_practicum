@@ -73,8 +73,8 @@ void generateMove(int computerSide){
 				}
 		}
 	//将可以下的点组合，要将两步映射为一步
-	for(int i  = 0; i < validCondition.size; i++)
-		for(int  j = i + 1; j < validCondition.size; j++){
+	for(int i  = 0; i < validCondition.size(); i++)
+		for(int  j = i + 1; j < validCondition.size(); j++){
 			Step temp;
 			temp.first.x = validCondition[i].x;
 			temp.first.y = validCondition[i].y;
@@ -109,7 +109,7 @@ int main()
 		{
 			fflush(stdin);
 			/***********将"令狐冲"改为你的队名，不超过6个汉字或12个英文字母，否则无成绩************/
-			/*******/		printf("name 令狐冲\n");		/**只修改令狐冲，不要删除name空格****/
+			/*******/		printf("name Eureka\n");		/**只修改令狐冲，不要删除name空格****/
 			/***********将"令狐冲"改为你的队名，不超过6个汉字或12个英文字母，否则无成绩************/
 		}
 		else if (strcmp(message, "new") == 0)//建立新棋局
