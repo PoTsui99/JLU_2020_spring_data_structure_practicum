@@ -24,6 +24,7 @@ struct Step{ //步结构
 	int value;
 };
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
+int simuBoard[19][19];//模拟棋盘 初始化在main函数里
 std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
 std::vector<Point_1> validCondition;//存储可以走的棋点
 bool hasNeighbor(int x, int y){
@@ -31,10 +32,10 @@ bool hasNeighbor(int x, int y){
 	int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
 	for(int i  = 0; i < 7; i++)
 		for(int  j = 1; j < 7; j++)
-			if (Board[x + direction_x[i]][y + direction_y[j]] != 2)
+			if (simuBoard[x + direction_x[i]][y + direction_y[j]] != 2)
 				return true;
 	for(int  i = 1; i < 7; i++)
-			if (Board[x + direction_x[i]][y] != 2)
+			if (simuBoard[x + direction_x[i]][y] != 2)
 				return true;
 	return false;
 }
@@ -98,7 +99,9 @@ int main()
 	srand(int(time(0)));
 	//此处放置初始化代码
     //...
-    
+    for(int i = 0; i < 19; i++)//初始化模拟棋盘
+		for(int j = 0; j < 19; j++)
+			simuBoard[i][j] = Board[i][j];
 	while (1)	//程序主循环
 	{
 		fflush(stdout);//不要删除此语句，否则程序会出问题
