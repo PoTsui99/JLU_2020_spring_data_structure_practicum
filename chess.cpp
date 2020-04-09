@@ -23,7 +23,8 @@ struct Step{ //步结构
 	Point first,second;
 	int value;
 };
-int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
+int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
+int simuBoard[19][19]; //模拟的棋盘,建议在走法函数中替换Board(Board作为默认初值)
 std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
 std::vector<Point_1> validCondition;//存储可以走的棋点
 bool hasNeighbor(int x, int y){
@@ -48,6 +49,7 @@ bool sortByM1( const Step &v1, const Step &v2)//注意：本函数的参数的类型一定要与
     return v1.value < v2.value;//升序排列
 }
 
+// 两步的
 void generateMove(int computerSide){
 	std::vector<Step>::iterator it;
 	std::vector<Point_1>::iterator it_1;
@@ -86,8 +88,6 @@ void generateMove(int computerSide){
 	//将moveCondition里面的元素按评估分数升序排列
 	std::sort(moveCondition.begin(),moveCondition.end(),sortByM1);
 }
-
-
 
 
 int main()
@@ -130,7 +130,7 @@ int main()
 				/**********生成第一手着法，并保存在step结构中，落子坐标为(step.first.x,step.first.y)**********/
 				/****************************在下方填充代码，并替换我的示例代码******************************/
 
-
+				// 第一步落子其实没啥好换的,直接手动优化
 				step.first.x = 9;
 				step.first.y = 9;
 
