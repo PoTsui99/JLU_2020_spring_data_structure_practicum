@@ -11,7 +11,7 @@
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
-int currentSize;//记录每次走法生成的个数
+
 struct Point{ //点结构
 	int x,y;
 };
@@ -25,7 +25,7 @@ struct Step{ //步结构
 };
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 
-std::vector<Step> moveCondition;//存储合法的走法，有效元素个数有currentSize记录
+std::vector<Step> moveCondition;//存储合法的走法，
 std::vector<Point_1> validCondition;//存储可以走的棋点
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){
 	int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
@@ -59,7 +59,6 @@ void generateMove(int computerSide, int simuBoard[19][19] = Board){
 	for (it_1 = validCondition.begin(); it_1 != validCondition.end(); ){
         it_1 = validCondition.erase(it_1);
     }
-	currentSize = 0;
 	//寻找可以下的点
 	for(int i  = 0; i < 19; i++)
 		for(int  j = 1; j < 19; j++){
