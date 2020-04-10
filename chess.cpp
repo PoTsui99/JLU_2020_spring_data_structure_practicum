@@ -7,10 +7,19 @@
 //学生后加的
 #include<vector> // 因为老师允许使用stl
 #include<algorithm>
+#include <cstring>
+#include <memory>
 
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
+#define INF INT_MAX
+#define nonSenseInt -1
+#define re(i,a,b) for(int i=a;i<b;++i)
+#define max(a,b) a>b?a:b
+#define min(a,b) a<b?a:b
+using namespace std;
+int currentSize;//记录每次走法生成的个数
 
 struct Point{ //点结构
 	int x,y;
@@ -24,10 +33,11 @@ struct Step{ //步结构
 	int value;
 };
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
+int evaluate(int computerSide, int simuBoard[19][19] = Board);// 第一个参数表示我方棋颜色,第二个参数为棋盘当前状态(其默认参数为全局量Board)
+int mySide=BLACK; // 方便起见,增加我方
 
-std::vector<Step> moveCondition;//存储合法的走法，
-std::vector<Point_1> validCondition;//存储可以走的棋点
-bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){
+
+bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){//存储合法的走法，
 	int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
 	int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
 	for(int i  = 0; i < 7; i++)
@@ -40,7 +50,7 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){
 	return false;
 }
 
-int getValue(int x, int y, int computerSide){
+int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 棋盘修改为局部变量
 
 }
 
@@ -50,21 +60,23 @@ bool sortByM1( const Step &v1, const Step &v2)//注意：本函数的参数的�
 }
 
 // 两步的
-void generateMove(int computerSide, int simuBoard[19][19] = Board){
-	std::vector<Step>::iterator it;
-	std::vector<Point_1>::iterator it_1;
-    for (it = moveCondition.begin(); it != moveCondition.end(); ){
-        it = moveCondition.erase(it);
-    }
-	for (it_1 = validCondition.begin(); it_1 != validCondition.end(); ){
-        it_1 = validCondition.erase(it_1);
-    }
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board){
+	// std::vector<Step>::iterator it;
+	std::vector<Point_1> validCondition;
+	std::vector<Point_1>::iterator ite;
+    // for (it = moveCondition.begin(); it != moveCondition.end(); ){
+    //     it = moveCondition.erase(it);
+    // }
+	// for (it_1 = validCondition.begin(); it_1 != validCondition.end(); ){
+    //     it_1 = validCondition.erase(it_1);
+    // }
 	//寻找可以下的点
+	vector<Step>* toReturn = new vector<Step>;
 	for(int i  = 0; i < 19; i++)
 		for(int  j = 1; j < 19; j++){
 				if (simuBoard[i][j] == 2){
-					if(hasNeighbor(i, j)){
-						int temp = getValue(i, j, computerSide);
+					if(hasNeighbor(i, j, simuBoard)){
+						int temp = getValue(i, j, computerSide, simuBoard);
 						Point_1 temp_struct;
 						temp_struct.x = i;
 						temp_struct.y = j;
@@ -82,12 +94,80 @@ void generateMove(int computerSide, int simuBoard[19][19] = Board){
 			temp.second.x = validCondition[j].x;
 			temp.second.y = validCondition[j].y;
 			temp.value = validCondition[i].score + validCondition[j].score;
-			moveCondition.push_back(temp);
+			toReturn->push_back(temp);
 		}
-	//将moveCondition里面的元素按评估分数升序排列
-	std::sort(moveCondition.begin(),moveCondition.end(),sortByM1);
+	//将toReturn里面的元素按评估分数升序排列
+	std::sort(toReturn->begin(),toReturn->end(),sortByM1);
+	return toReturn;
 }
 
+
+void copyStep(Step to, Step from){
+    to.first.x = from.first.x;
+    to.first.y = from.first.y;
+    to.second.x = from.second.x;
+    to.second.y = from.second.y;
+}
+
+int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=Board){
+    // TODO:出现平局、胜负情况下的判定返回,即没有child的情况
+    if(depth == 0){ // 叶节点
+        return (whosTurn==mySide?1:-1)*evaluate(whosTurn,simuBoard);
+    }
+
+    int highestScore = (-1)*INF;
+    int negaMaxValue = nonSenseInt;
+    auto subBoard = new int[19][19];
+    memcpy(subBoard,simuBoard,sizeof(int[19][19]));
+    vector<Step>* toMove = generateMove(whosTurn,simuBoard);
+    re(i,0,(*toMove).size()){
+		// move
+        subBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = whosTurn;
+        subBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = whosTurn;
+        negaMaxValue = (-1)*negaMax(1-whosTurn, depth-1,(-1)*alpha,(-1)*beta,subBoard);
+        highestScore = max(highestScore,negaMaxValue);
+        alpha = max(alpha,negaMaxValue);
+        if(alpha>=beta){ // 隐式剪枝
+            return alpha;
+        }
+		// unmove
+		subBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = EMPTY;
+        subBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
+    }
+    return highestScore;
+}
+
+Step aGoodStep(int depth){
+    Step move;
+    int highestScore = (-1)*INT_MAX;
+    int alpha = (-1)*INF;
+    int beta = INF;
+    int possibleScore = nonSenseInt;
+    Step candidateMove;
+    auto simuBoard = new int[19][19];
+    memcpy(simuBoard,Board,sizeof(int[19][19]));
+
+    vector<Step>* toMove = generateMove(mySide,simuBoard);
+    memcpy(simuBoard,Board,sizeof(Board));
+
+
+    re(i,0,(*toMove).size()){
+        // move
+        simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = mySide;
+        simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = mySide;
+        possibleScore = (-1)*negaMax(1-mySide,depth,alpha,beta,simuBoard);
+        if(possibleScore>highestScore){
+            highestScore = possibleScore;
+            copyStep(candidateMove,(*toMove)[i]);
+        }
+        // unmove
+        simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = EMPTY;
+        simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
+    }
+
+    free(simuBoard);
+
+}
 
 int main()
 {
@@ -153,6 +233,7 @@ int main()
 			/***生成落子的坐标，保存在step结构中，第1子下在(step.first.x,step.first.y)，第2子下在(step.first.x,step.first.y)*****/
 			/**************************************在下方填充代码，并替换我的示例代码*****************************************/
 			
+			mySide = computerSide;
 			//生成第1子落子位置step.first.x和step.first.y
 			int x, y;
 			x = rand() % 19; y = rand() % 19;
