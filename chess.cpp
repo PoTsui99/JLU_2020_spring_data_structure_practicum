@@ -15,6 +15,16 @@
 #define EMPTY 2
 #define INF INT_MAX
 #define nonSenseInt -1
+#define C6 1000000
+#define A5 100000
+#define S5 50000
+#define A——4 50000
+#define S4 10000
+#define A3 10000
+#define I3 5000
+#define S3 1000
+#define A2 100
+#define S2 10
 #define re(i,a,b) for(int i=a;i<b;++i)
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
@@ -33,10 +43,388 @@ struct Step{ //步结构
     int value;
 };
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
-int evaluate(int computerSide, int simuBoard[19][19] = Board){// 第一个参数表示我方棋颜色,第二个参数为棋盘当前状态(其默认参数为全局量Board)
-    return 1;
-}
+
 int mySide=BLACK; // 方便起见,增加我方
+
+//横向储存
+void ROW(int path[8], int sim[19][19], int m, int n,int color)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        path[i] = sim[m][n + i];
+        if (path[i] == 2)
+        {
+            path[i] = 0;
+        }
+        else if (path[i] == color)
+        {
+            path[i] = 1;
+        }
+        else
+        {
+            path[i] = -1;
+        }
+    }
+}
+
+void COL(int path[8], int sim[19][19], int m, int n,int color)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        path[i] = sim[m + i][n];
+        if (path[i] == 2)
+        {
+            path[i] = 0;
+        }
+        else if (path[i] == color)
+        {
+            path[i] = 1;
+        }
+        else
+        {
+            path[i] = -1;
+        }
+    }
+}
+void Diagonal(int path[8], int sim[19][19], int m, int n,int color)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        path[i] = sim[m + i][n + i];
+        if (path[i] == 2)
+        {
+            path[i] = 0;
+        }
+        else if (path[i] == color)
+        {
+            path[i] = 1;
+        }
+        else
+        {
+            path[i] = -1;
+        }
+    }
+}
+void exDiagonal(int path[8], int sim[19][19], int m, int n,int color)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        path[i] = sim[m + i][n - i];
+        if (path[i] == 2)
+        {
+            path[i] = 0;
+        }
+        else if (path[i] == color)
+        {
+            path[i] = 1;
+        }
+        else
+        {
+            path[i] = -1;
+        }
+    }
+}
+int compare7(int path[7])
+{
+    int sum1[7] = { 0,1,1,1,1,1,1 };
+    int sum2[7] = { 1,1,1,1,1,1,0 };
+    int sum3[7] = { 1,1,1,1,1,1,1 };
+    int r = 0;
+    r = equal(path, path + 7, sum1);
+    if (r == 1) return 0;
+    r = equal(path, path + 7, sum2);
+    if (r == 1) return 0;
+    r = equal(path, path + 7, sum3);
+    if (r == 1) return 0;
+    //七连和六连
+    int A_5_1[7] = { 0,1,1,1,1,1,0 };
+    r = equal(path, path + 7, A_5_1);
+    if (r == 1) return 1;
+    return -1;
+}
+int compare8(int path[8])
+{
+    int A5_2[8] = { 0,0,1,1,1,1,0,1 };
+    int A5_3[8] = { 1,0,1,1,1,1,0,0 };
+    int r = 0;
+    r = equal(path, path + 8, A5_2);
+    if (r == 1) return 1;
+    r = equal(path, path + 8, A5_3);
+    if (r == 1) return 1;
+
+    int S5_1[8] = { -1,1,1,1,1,1,0 };
+    int S5_2[8] = { 0,1,1,1,1,1,-1 };
+    r = equal(path, path + 8, S5_1);
+    if (r == 1) return 2;
+    r = equal(path, path + 8, S5_2);
+    if (r == 1) return 2;
+    if (path[0] == -1 || path[1] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 8; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 5 && n == 1) return 2;
+    }
+    if (path[7] == -1 || path[6] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 5; i >= 8; i--)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 5 && n == 1) return 2;
+    }
+    //眠五检测完毕
+
+    int A4[8] = { 0,0,1,1,1,1,0,0 };
+    r = equal(path, path + 8, A4);
+    if (r == 1) return 2;
+    //活四检测完毕
+
+    if (path[0] == -1 || path[7] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 1; i < 7; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 4 && n == 2) return 3;
+    }
+    //眠四检测完成
+
+    int A3_1[8] = { 0,0,1,1,1,0,0,0 };
+    int A3_2[8] = { 0,0,1,1,0,1,0,0 };
+    int A3_3[8] = { 0,0,1,0,1,1,0,0 };
+    int A3_4[8] = { 0,0,0,1,1,1,0,0 };
+    r = equal(path, path + 8, A3_1);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_2);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_3);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_4);
+    if (r == 1) return 3;
+    //活三检测完毕
+
+    if (path[0] == -1 || path[7] == -1)
+    {
+        if (path[1] == 0 && path[6] == 0)
+        {
+            int num = 0;
+            int n = 0;
+            for (int i = 2; i < 6; i++)
+            {
+                if (path[i] == 1) num++;
+                if (path[i] == 0) n++;
+            }
+            if (num == 3 && n == 1) return 4;
+        }
+    }
+    //朦胧三判断完毕
+
+    if (path[0] == -1 || path[2] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 8; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 3 && n == 3) return 5;
+    }
+
+    if (path[7] == -1 || path[6] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 5; i >= 0; i--)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 3 && n == 3) return 5;
+    }
+    //眠三判断完毕
+    int m1 = 0;
+    int m0 = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        if (path[i] == 1) m1++;
+        if (path[i] == 0) m0++;
+    }
+    if (m1 == 2 && m0 == 4) return 6;
+    //活二检测完毕
+
+    if (path[0] == -1 || path[1] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 8; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 2 && n == 4) return 7;
+    }
+    if (path[0] == -1 || path[7] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 7; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 2 && n == 4) return 7;
+    }
+    if (path[7] == -1 || path[6] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 0; i < 6; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 2 && n == 4) return 7;
+    }
+    //眠二检测完毕
+    return -1;
+}
+
+void numberReturn(int simuBoard[19][19], int color, int CS[8])
+{
+    int number = 0;
+    int num = 0;
+    int r = 0;
+    int path[8] = { 0,0,0,0,0,0,0,0 };
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 11; j++)
+        {
+            ROW(path, simuBoard, i, j, color);
+            r = compare8(path);
+            if (r != -1)
+            {
+                CS[r]++;
+            }
+        }
+
+    }
+    //横向判断
+    for (int i = 0; i < 11; i++)
+    {
+        for (int j = 0; j < 19; j++)
+        {
+            COL(path, simuBoard, i, j, color);
+            r = compare8(path);
+            if (r != -1)
+            {
+                CS[r]++;
+            }
+        }
+
+    }
+    //纵向判断
+    for (int i = 0; i < 11; i++)
+    {
+        for (int j = 0; j < 11; j++)
+        {
+            Diagonal(path, simuBoard, i, j,color);
+            r = compare8(path);
+            if (r != -1)
+            {
+                CS[r]++;
+            }
+        }
+
+    }
+    //斜向判断
+    for (int i = 8; i < 19; i++)
+    {
+        for (int j = 0; j < 11; j++)
+        {
+            exDiagonal(path, simuBoard, i, j,color);
+            r = compare8(path);
+            if (r != -1)
+            {
+                CS[r]++;
+            }
+        }
+    }
+    return;
+}
+
+int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估分
+{
+    int CS[8] = { 0,0,0,0,0,0,0,0 };
+    int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
+    int path[7] = { 0,0,0,0,0,0,0 };
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 12; j++)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                path[k] = simuBoard[i][j + k];
+            }
+            int r = compare7(path);
+            if (r != -1) CS[r]++;
+        }
+    }
+    for (int i = 0; i < 12; i++)
+    {
+        for (int j = 0; j < 19; j++)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                path[k] = simuBoard[i + k][j];
+            }
+            int r = compare7(path);
+            if (r != -1) CS[r]++;
+        }
+    }
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 12; j++)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                path[k] = simuBoard[i + k][j + k];
+            }
+            int r = compare7(path);
+            if (r != -1) CS[r]++;
+        }
+    }
+    for (int i = 7; i < 19; i++)
+    {
+        for (int j = 0; j < 12; j++)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                path[k] = simuBoard[i - k][j + k];
+            }
+            int r = compare7(path);
+            if (r != -1) CS[r]++;
+        }
+    }
+    numberReturn(simuBoard, computerside, CS);
+    int score = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        score = score + CS[i] * value[i];
+    }
+    return score;
+}
 
 void copyStep(Step to, Step from){ // 对Step进行数值拷贝
     to.first.x = from.first.x;
