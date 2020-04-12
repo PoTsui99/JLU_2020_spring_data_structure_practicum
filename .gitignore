@@ -5,3 +5,5 @@
 /.vs
 *.json
 .vscode/
+comp1.cpp
+comp2.cpp

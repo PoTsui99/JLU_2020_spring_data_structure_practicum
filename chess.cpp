@@ -168,6 +168,7 @@ int compare8(int path[8])
     if (r == 1) return 1;
     r = equal(path, path + 8, A5_3);
     if (r == 1) return 1;
+<<<<<<< HEAD
 
     int S5_1[8] = { -1,1,1,1,1,1,0 };
     int S5_2[8] = { 0,1,1,1,1,1,-1 };
@@ -259,6 +260,99 @@ int compare8(int path[8])
         if (num == 3 && n == 3) return 5;
     }
 
+=======
+
+    int S5_1[8] = { -1,1,1,1,1,1,0 };
+    int S5_2[8] = { 0,1,1,1,1,1,-1 };
+    r = equal(path, path + 8, S5_1);
+    if (r == 1) return 2;
+    r = equal(path, path + 8, S5_2);
+    if (r == 1) return 2;
+    if (path[0] == -1 || path[1] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 8; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 5 && n == 1) return 2;
+    }
+    if (path[7] == -1 || path[6] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 5; i >= 8; i--)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 5 && n == 1) return 2;
+    }
+    //眠五检测完毕
+
+    int A4[8] = { 0,0,1,1,1,1,0,0 };
+    r = equal(path, path + 8, A4);
+    if (r == 1) return 2;
+    //活四检测完毕
+
+    if (path[0] == -1 || path[7] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 1; i < 7; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 4 && n == 2) return 3;
+    }
+    //眠四检测完成
+
+    int A3_1[8] = { 0,0,1,1,1,0,0,0 };
+    int A3_2[8] = { 0,0,1,1,0,1,0,0 };
+    int A3_3[8] = { 0,0,1,0,1,1,0,0 };
+    int A3_4[8] = { 0,0,0,1,1,1,0,0 };
+    r = equal(path, path + 8, A3_1);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_2);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_3);
+    if (r == 1) return 3;
+    r = equal(path, path + 8, A3_4);
+    if (r == 1) return 3;
+    //活三检测完毕
+
+    if (path[0] == -1 || path[7] == -1)
+    {
+        if (path[1] == 0 && path[6] == 0)
+        {
+            int num = 0;
+            int n = 0;
+            for (int i = 2; i < 6; i++)
+            {
+                if (path[i] == 1) num++;
+                if (path[i] == 0) n++;
+            }
+            if (num == 3 && n == 1) return 4;
+        }
+    }
+    //朦胧三判断完毕
+
+    if (path[0] == -1 || path[2] == -1)
+    {
+        int num = 0;
+        int n = 0;
+        for (int i = 2; i < 8; i++)
+        {
+            if (path[i] == 1) num++;
+            if (path[i] == 0) n++;
+        }
+        if (num == 3 && n == 3) return 5;
+    }
+
+>>>>>>> 81bf11173db278ac6a06fe945cf8fd68ce828aff
     if (path[7] == -1 || path[6] == -1)
     {
         int num = 0;
@@ -447,8 +541,7 @@ void copyStep(Step to, Step from){ // 对Step进行数值拷贝
     to.second.x = from.second.x;
     to.second.y = from.second.y;
 }
-bool isInRange(int x, int y)
-{
+bool isInRange(int x, int y){
     return (x>=0&&x<19&&y>=0&&y<19);
 }
 int placeNotEmpty(int simuBoard[19][19] = Board){
@@ -461,6 +554,7 @@ int placeNotEmpty(int simuBoard[19][19] = Board){
         }
     return cnt;
 }
+
 int whoWin(int side = mySide, int simuBoard[19][19] = Board){ // 返回值1:side方赢;2:side的反方赢
     /* (0,0) (0,1) (0,2)....
      * .
@@ -515,6 +609,7 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){ // 存储合法�
             return true;
     return false;
 }
+<<<<<<< HEAD
 //int evaluate(int computerside, int simuBoard[19][19] = Board)
 int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 棋盘修改为局部变量
     if(computerSide == BLACK){
@@ -529,7 +624,7 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 
         simuBoard[x][y] = 2;
         return score;
     }
-}
+
 bool sortByM1(const Step &v1, const Step &v2){ //注意：本函数的参数的类型一定要与vector中元素的类型一致
     return v1.value < v2.value;//升序排列
 }
