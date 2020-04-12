@@ -18,7 +18,7 @@
 #define C6 1000000
 #define A5 100000
 #define S5 50000
-#define A——4 50000
+//#define A4 50000
 #define S4 10000
 #define A3 10000
 #define I3 5000
@@ -29,7 +29,6 @@
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
 using namespace std;
-int currentSize;//记录每次走法生成的个数
 
 struct Point{ //点结构
     int x,y;
@@ -42,12 +41,31 @@ struct Step{ //步结构
     Point first,second;
     int value;
 };
+// global:
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
-
 int mySide=BLACK; // 方便起见,增加我方
+// definition:
+void copyStep(Step to, Step from);
+bool sortByM1(const Step &v1, const Step &v2);
+bool isInRange(int x, int y);
+int evaluate(int computerside, int simuBoard[19][19]);
+void ROW(int path[8], int m, int n,int color,int sim[19][19]);
+void COL(int path[8], int m, int n,int color, int sim[19][19]);
+void Diagonal(int path[8], int m, int n,int color, int sim[19][19]);
+void exDiagonal(int path[8], int m, int n,int color, int sim[19][19]);
+int compare7(int path[7]);
+int compare8(int path[8]);
+void numberReturn( int color, int CS[8],int simuBoard[19][19]);
+int placeNotEmpty(int simuBoard[19][19]);
+//int whoWin(int side = mySide, int simuBoard[19][19]);
+bool hasNeighbor(int x, int y, int simuBoard[19][19]);
+int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
+int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]);
+Step aGoodStep(int depth);
 
 //横向储存
-void ROW(int path[8], int sim[19][19], int m, int n,int color)
+void ROW(int path[8], int m, int n,int color,int sim[19][19]=Board)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -66,8 +84,7 @@ void ROW(int path[8], int sim[19][19], int m, int n,int color)
         }
     }
 }
-
-void COL(int path[8], int sim[19][19], int m, int n,int color)
+void COL(int path[8], int m, int n,int color, int sim[19][19]=Board)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -86,7 +103,7 @@ void COL(int path[8], int sim[19][19], int m, int n,int color)
         }
     }
 }
-void Diagonal(int path[8], int sim[19][19], int m, int n,int color)
+void Diagonal(int path[8], int m, int n,int color, int sim[19][19]=Board)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -105,7 +122,7 @@ void Diagonal(int path[8], int sim[19][19], int m, int n,int color)
         }
     }
 }
-void exDiagonal(int path[8], int sim[19][19], int m, int n,int color)
+void exDiagonal(int path[8], int m, int n,int color, int sim[19][19]=Board)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -300,8 +317,7 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
-
-void numberReturn(int simuBoard[19][19], int color, int CS[8])
+void numberReturn( int color, int CS[8],int simuBoard[19][19]=Board)
 {
     int number = 0;
     int num = 0;
@@ -311,7 +327,7 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     {
         for (int j = 0; j < 11; j++)
         {
-            ROW(path, simuBoard, i, j, color);
+            ROW(path, i, j, color, simuBoard);
             r = compare8(path);
             if (r != -1)
             {
@@ -325,7 +341,7 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     {
         for (int j = 0; j < 19; j++)
         {
-            COL(path, simuBoard, i, j, color);
+            COL(path, i, j, color, simuBoard);
             r = compare8(path);
             if (r != -1)
             {
@@ -339,7 +355,7 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     {
         for (int j = 0; j < 11; j++)
         {
-            Diagonal(path, simuBoard, i, j,color);
+            Diagonal(path, i, j,color), simuBoard;
             r = compare8(path);
             if (r != -1)
             {
@@ -353,7 +369,7 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     {
         for (int j = 0; j < 11; j++)
         {
-            exDiagonal(path, simuBoard, i, j,color);
+            exDiagonal(path, i, j,color, simuBoard);
             r = compare8(path);
             if (r != -1)
             {
@@ -363,7 +379,6 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     }
     return;
 }
-
 int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估分
 {
     int CS[8] = { 0,0,0,0,0,0,0,0 };
@@ -417,7 +432,7 @@ int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估�
             if (r != -1) CS[r]++;
         }
     }
-    numberReturn(simuBoard, computerside, CS);
+    numberReturn( computerside, CS,simuBoard);
     int score = 0;
     for (int i = 0; i < 8; i++)
     {
@@ -432,12 +447,10 @@ void copyStep(Step to, Step from){ // 对Step进行数值拷贝
     to.second.x = from.second.x;
     to.second.y = from.second.y;
 }
-
 bool isInRange(int x, int y)
 {
     return (x>=0&&x<19&&y>=0&&y<19);
 }
-
 int placeNotEmpty(int simuBoard[19][19] = Board){
     int cnt = 0;
     re(i,0,19)
@@ -487,10 +500,9 @@ int whoWin(int side = mySide, int simuBoard[19][19] = Board){ // 返回值1:side
                     }
                 }
             }
-    }
+        }
     return 0; // 未决出胜负
 }
-
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){ // 存储合法的走法
     int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
     int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
@@ -503,15 +515,12 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){ // 存储合法�
             return true;
     return false;
 }
-
 int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 棋盘修改为局部变量
     return 1;
 }
-
 bool sortByM1(const Step &v1, const Step &v2){ //注意：本函数的参数的类型一定要与vector中元素的类型一致
     return v1.value < v2.value;//升序排列
 }
-
 // 两步的
 vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board){
     // std::vector<Step>::iterator it;
@@ -553,18 +562,17 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board){
     std::sort(toReturn->begin(),toReturn->end(),sortByM1);
     return toReturn;
 }
-
 int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=Board){
     // TODO: 出现平局、胜负情况下的判定返回,即没有child的情况
     // FIXME: 确定whoWin的参数是mySide还是whosTurn
     //平局
     if(whoWin(whosTurn,simuBoard)==0&&placeNotEmpty(simuBoard)==19*19)
         return 0;
-    // FIXME: 返回值取决于评估值的上限
+        // FIXME: 返回值取决于评估值的上限
     else if(whoWin(whosTurn,simuBoard)==1){
         return INF;
     }
-    // FIXME: 返回值取决于评估值的下限
+        // FIXME: 返回值取决于评估值的下限
     else if(whoWin(whosTurn,simuBoard)==-1){
         return (-1)*INF;
     }
@@ -593,7 +601,6 @@ int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=B
     }
     return highestScore;
 }
-
 Step aGoodStep(int depth){
     Step move;
     int highestScore = (-1)*INT_MAX;
