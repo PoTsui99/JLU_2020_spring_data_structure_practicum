@@ -520,12 +520,11 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 
         simuBoard[x][y] = 2;
         return score;
     }
-    if(computerSide == WHITE){
          simuBoard[x][y] = 1;
         int score = evaluate(computerSide,simuBoard);
         simuBoard[x][y] = 2;
         return score;
-    }
+    
 }
 bool sortByM1(const Step &v1, const Step &v2){ //注意：本函数的参数的类型一定要与vector中元素的类型一致
     return v1.value < v2.value;//升序排列
