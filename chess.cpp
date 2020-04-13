@@ -11,6 +11,16 @@
 #include <memory>
 #include <limits.h>
 
+
+//== debug用
+#include <fstream> //用以重定向
+#define cin fin
+#define cout fout
+ifstream fin("test.in");
+ofstream fout("test.out");
+//==以上debug用
+
+
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
