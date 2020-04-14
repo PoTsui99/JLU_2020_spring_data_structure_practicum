@@ -71,7 +71,7 @@ int placeNotEmpty(int simuBoard[19][19]);
 //int whoWin(int side = mySide, int simuBoard[19][19]);
 bool hasNeighbor(int x, int y, int simuBoard[19][19]);
 int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int flag_1);
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]);
 Step* aGoodStep(int depth);
 
@@ -545,8 +545,11 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board) { //
 bool sortByM1(const Step& v1, const Step& v2) { //注意：本函数的参数的类型一定要与vector中元素的类型一致
     return v1.value > v2.value; // 降序排列
 }
+bool sortByM2(const Step& v1, const Step& v2) { //注意：本函数的参数的类型一定要与vector中元素的类型一致
+    return v1.value < v2.value; // 升序排列
+}
 // 两步的
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board) {
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int flag_1) {
     // std::vector<Step>::iterator it;
     std::vector<Point_1> validCondition;
     std::vector<Point_1>::iterator ite;
@@ -583,7 +586,11 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board) {
             toReturn->push_back(temp);
         }
     //将toReturn里面的元素按评估分数升序排列
-    std::sort(toReturn->begin(), toReturn->end(), sortByM1);
+    if (flag_1 == 0){
+        std::sort(toReturn->begin(), toReturn->end(), sortByM1);
+         return toReturn;
+    }
+    std::sort(toReturn->begin(), toReturn->end(), sortByM2);
     return toReturn;
 }
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19] = Board) {
