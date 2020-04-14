@@ -476,17 +476,17 @@ int whoWin(int side = mySide, int simuBoard[19][19] = Board){ // 返回值1:side
      * .
      * (18,0) (18,1)........(18,18)
      * */
-    int dir[4][2] = {0, 1, 1, 0,1, 1, 1, 1 - 1};
+    int dir[4][2] = {0, 1, 1, 0, 1, 1, 1, -1};
 
     int cnt = 0;
     re(i, 0, 19)
         re(j, 0, 19) { // 每点遍历
             if (simuBoard[i][j] == mySide) { // 看我方执棋是否六连
-                re(l, 0, 4) {// 四个方向
+                re(k, 0, 4) { // 四个方向
                     cnt = 0;
-                    re(k, 0, 6) {
-                        if (isInRange(i + k * dir[0][0], j + k * dir[0][1])) {
-                            if (simuBoard[i + k * dir[0][0]][j + k * dir[0][1]] != mySide){
+                    re(l, 0, 6) { //第几颗连子 
+                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+                            if (simuBoard[i + k * dir[k][0]][j + k * dir[k][1]] != mySide){
                                 break;
                             }else ++cnt; // 连子数+1
                         } else break; // 出现界外
@@ -496,11 +496,11 @@ int whoWin(int side = mySide, int simuBoard[19][19] = Board){ // 返回值1:side
                 }
             }
             else if (simuBoard[i][j] == 1 - mySide) {
-                re(l, 0, 4) {// 四个方向
+                re(k, 0, 4) {// 四个方向
                     cnt = 0;
-                    re(k, 0, 6) {
-                        if (isInRange(i + k * dir[0][0], j + k * dir[0][1])) {
-                            if (simuBoard[i + k * dir[0][0]][j + k * dir[0][1]] != 1 - mySide){
+                    re(l, 0, 6) {
+                        if (isInRange(i + l * dir[k][0], j + k * dir[k][1])) {
+                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - mySide){
                                 break;
                             }else ++cnt; // 连子数+1
                         } else break; // 出现界外
@@ -512,6 +512,7 @@ int whoWin(int side = mySide, int simuBoard[19][19] = Board){ // 返回值1:side
         }
     return 0; // 未决出胜负
 }
+
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){ // 存储合法的走法
     int direction_x[7] = {0, 1, 2, 3, -1, -2, -3};
     int direction_y[7] = {0, 1, 2, 3, -1, -2, -3};
