@@ -9,7 +9,6 @@
 #include<algorithm>
 #include <cstring>
 #include <memory>
-#include <limits.h>
 
 #define BLACK 0
 #define WHITE 1
