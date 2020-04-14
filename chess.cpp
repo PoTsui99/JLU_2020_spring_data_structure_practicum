@@ -531,10 +531,10 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 
         simuBoard[x][y] = 2;
         return score;
     }
-         simuBoard[x][y] = 1;
-        int score = evaluate(computerSide,simuBoard);
-        simuBoard[x][y] = 2;
-        return score;
+    simuBoard[x][y] = 1;
+    int score = evaluate(computerSide,simuBoard);
+    simuBoard[x][y] = 2;
+    return score;
 
 }
 bool sortByM1(const Step &v1, const Step &v2){ //注意：本函数的参数的类型一定要与vector中元素的类型一致
@@ -589,11 +589,11 @@ int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=B
         return 0;
         // FIXME: 返回值取决于评估值的上限
     else if(whoWin(whosTurn,simuBoard)==1){
-        return INF;
+        return 10000;
     }
         // FIXME: 返回值取决于评估值的下限
     else if(whoWin(whosTurn,simuBoard)==-1){
-        return (-1)*INF;
+        return (-1)*10000;
     }
     if(depth == 0){ // 叶节点
         return ((whosTurn==mySide)?1:-1)*evaluate(whosTurn,simuBoard);
@@ -623,24 +623,23 @@ int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=B
     return highestScore;
 }
 Step aGoodStep(int depth){
-    Step move;
+//    Step move;
     int highestScore = (-1)*INT_MAX;
     int alpha = (-1)*INF;
     int beta = INF;
     int possibleScore = nonSenseInt;
-    Step candidateMove;
+    Step candidateMove; // 存储暂时评分最高的一步
     auto simuBoard = new int[19][19];
     memcpy(simuBoard,Board,sizeof(int[19][19]));
+    vector<Step>* toMove = generateMove(mySide,simuBoard); // 可下的全部位子
 
-    vector<Step>* toMove = generateMove(mySide,simuBoard);
-    memcpy(simuBoard,Board,sizeof(Board));
-
-
-    re(i,0,(*toMove).size()){
+    // FIXME: 这里的逻辑其实不是特别清楚
+    re(i,0,(*toMove).size()){ // 对全部可下位子进行评估(非静态)
         // move
         simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = mySide;
         simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = mySide;
-        possibleScore = (-1)*negaMax(1-mySide,depth,alpha,beta,simuBoard);
+//        possibleScore = (-1)*negaMax(1-mySide,depth,alpha,beta,simuBoard);
+        possibleScore = negaMax(1-mySide,depth,alpha,beta,simuBoard);
         if(possibleScore>highestScore){
             highestScore = possibleScore;
             copyStep(candidateMove,(*toMove)[i]);
@@ -666,8 +665,13 @@ int main()
     mySide = BLACK; // 直接默认我方执黑,看决策程序能否给出正确的决策结果
     // TODO: 决定搜索深度
     int depth = 3;
-
-    Step toMove = aGoodStep(depth);
+    Step toMove;
+    toMove = aGoodStep(depth);
+    vector<Step>* ptr = generateMove(mySide,Board);
+//    toMove.first.x = (*ptr)[0].first.x;
+//    toMove.first.y = (*ptr)[0].first.y;
+//    toMove.second.x = (*ptr)[0].second.x;
+//    toMove.second.y = (*ptr)[0].second.y;
     Board[toMove.first.x][toMove.first.y] = mySide;
     Board[toMove.second.x][toMove.second.y] = mySide;
 
