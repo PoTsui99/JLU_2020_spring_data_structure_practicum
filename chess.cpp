@@ -638,7 +638,7 @@ Step aGoodStep(int depth){
     }
 
     free(simuBoard);
-
+    return candidateMove;
 }
 
 int main()
