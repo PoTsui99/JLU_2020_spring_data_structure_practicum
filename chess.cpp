@@ -526,14 +526,14 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board){ // 存储合法�
 }
 int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 棋盘修改为局部变量
     if(computerSide == BLACK){
-        simuBoard[x][y] = 0;
+        simuBoard[x][y] = BLACK;
         int score = evaluate(computerSide,simuBoard);
-        simuBoard[x][y] = 2;
+        simuBoard[x][y] = EMPTY;
         return score;
     }
-         simuBoard[x][y] = 1;
+         simuBoard[x][y] = WHITE;
         int score = evaluate(computerSide,simuBoard);
-        simuBoard[x][y] = 2;
+        simuBoard[x][y] = EMPTY;
         return score;
 
 }
@@ -554,7 +554,7 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board){
     //寻找可以下的点
     vector<Step>* toReturn = new vector<Step>;
     for(int i  = 0; i < 19; i++)
-        for(int  j = 1; j < 19; j++){
+        for(int  j = 0; j < 19; j++){//我不知道之前为啥写成1，但看起来j初始值为0更对一点
             if (simuBoard[i][j] == 2){
                 if(hasNeighbor(i, j, simuBoard)){
                     int temp = getValue(i, j, computerSide, simuBoard);
