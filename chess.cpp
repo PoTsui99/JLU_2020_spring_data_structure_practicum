@@ -11,7 +11,7 @@
 #include <memory>
 #include <limits.h>
 
-
+using namespace std;
 //== debug用
 #include <fstream> //用以重定向
 #define cin fin
@@ -39,7 +39,7 @@ ofstream fout("test.out");
 #define re(i,a,b) for(int i=a;i<b;++i)
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
-using namespace std;
+
 
 struct Point{ //点结构
     int x,y;
@@ -535,7 +535,7 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board){ // 
         int score = evaluate(computerSide,simuBoard);
         simuBoard[x][y] = 2;
         return score;
-    
+
 }
 bool sortByM1(const Step &v1, const Step &v2){ //注意：本函数的参数的类型一定要与vector中元素的类型一致
     return v1.value < v2.value;//升序排列
@@ -596,13 +596,14 @@ int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=B
         return (-1)*INF;
     }
     if(depth == 0){ // 叶节点
-        return (whosTurn==mySide?1:-1)*evaluate(whosTurn,simuBoard);
+        return ((whosTurn==mySide)?1:-1)*evaluate(whosTurn,simuBoard);
     }
 
     int highestScore = (-1)*INF;
     int negaMaxValue = nonSenseInt;
     auto subBoard = new int[19][19];
     memcpy(subBoard,simuBoard,sizeof(int[19][19]));
+    // XXX: 可能会由于generate函数错误导致连带错误
     vector<Step>* toMove = generateMove(whosTurn,simuBoard);
     re(i,0,(*toMove).size()){
         // move
@@ -611,6 +612,7 @@ int negaMax(int whosTurn, int depth, int alpha, int beta,int simuBoard[19][19]=B
         negaMaxValue = (-1)*negaMax(1-whosTurn, depth-1,(-1)*alpha,(-1)*beta,subBoard);
         highestScore = max(highestScore,negaMaxValue);
         alpha = max(alpha,negaMaxValue);
+        // beta = min(beta,negaMaxValue);
         if(alpha>=beta){ // 隐式剪枝
             return alpha;
         }
@@ -661,10 +663,10 @@ int main()
     srand(int(time(0)));
     //此处放置初始化代码
     //...
-    while (1)	//程序主循环
+    if (1)	//程序主循环
     {
-        fflush(stdout);//不要删除此语句，否则程序会出问题
-        scanf("%s", message);//获取平台命令消息
+        // fflush(stdout);//不要删除此语句，否则程序会出问题
+        cin >> message;//获取平台命令消息
         //分析命令
         if (strcmp(message, "name?") == 0)//向对战平台发送队名
         {
@@ -704,24 +706,27 @@ int main()
         }
         else if(strcmp(message,"move")==0)//行棋,本程序核心,正常下棋
         {
-            scanf("%s", message);//获取对手行棋着法
-            fflush(stdin);
-            step.first.x=message[0]-'A';		step.first.y=message[1]-'A';
-            step.second.x=message[2]-'A';		step.second.y=message[3]-'A';
-            //处理对手行棋
-            Board[step.first.x][step.first.y] = 1 - computerSide;
-            if(!(step.second.x==-1 && step.second.y==-1)) Board[step.second.x][step.second.y] = 1 - computerSide;
+            // scanf("%s", message);//获取对手行棋着法
+            // fflush(stdin);
+            // step.first.x=message[0]-'A';		step.first.y=message[1]-'A';
+            // step.second.x=message[2]-'A';		step.second.y=message[3]-'A';
+            // //处理对手行棋
+            // Board[step.first.x][step.first.y] = 1 - computerSide;
+            // if(!(step.second.x==-1 && step.second.y==-1)) Board[step.second.x][step.second.y] = 1 - computerSide;
 
             /**********************************************************************************************************/
             /***生成落子的坐标，保存在step结构中，第1子下在(step.first.x,step.first.y)，第2子下在(step.first.x,step.first.y)*****/
             /**************************************在下方填充代码，并替换我的示例代码*****************************************/
-
-            mySide = computerSide;
+            re(i,0,19)
+                re(j,0,19){
+                    cin >> Board[i][j];
+                }
+            mySide = BLACK; // 我方执黑
             // TODO: 决定搜索深度
             int depth = 3;
             Step toMove = aGoodStep(depth);
-            Board[toMove.first.x][toMove.first.y] = computerSide;
-            Board[toMove.second.x][toMove.second.y] = computerSide;
+            Board[toMove.first.x][toMove.first.y] = mySide;
+            Board[toMove.second.x][toMove.second.y] = mySide;
 //            //生成第1子落子位置step.first.x和step.first.y
 //            int x, y;
 //            x = rand() % 19; y = rand() % 19;
@@ -746,7 +751,13 @@ int main()
             /*****************************************在上面填充代码******************************************************/
             /**********************************************************************************************************/
 
-            printf("move %c%c%c%c\n",step.first.x+'A',step.first.y+'A',step.second.x+'A',step.second.y+'A');//输出着法
+            cout << "move:" << step.first.x+'A' << step.first.y+'A' << step.second.x+'A' << step.second.y+'A' << endl << endl;//输出着法
+            re(i,0,19){
+                    re(j,0,19){
+                    cout << Board[i][j] << ' ';
+                }
+                cout << endl;
+            }
         }
         else if (strcmp(message, "error") == 0)//着法错误
         {
@@ -761,7 +772,7 @@ int main()
         {
             fflush(stdin);
             printf("Quit!\n");
-            break;
+            // break;
         }
     }
     return 0;
