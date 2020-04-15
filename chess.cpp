@@ -9,6 +9,7 @@
 #include<algorithm>
 #include <cstring>
 #include <memory>
+#include <fstream>
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
@@ -60,7 +61,7 @@ int placeNotEmpty(int simuBoard[19][19] = Board);
 int whoWin(int side = mySide, int simuBoard[19][19] = Board);
 bool hasNeighbor(int x, int y, int simuBoard[19][19]);
 int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19]=Board);
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]);
 Step* aGoodStep(int depth);
 void ROW(int path[8], int sim[19][19], int m, int n, int color);
@@ -644,7 +645,7 @@ bool sortByM1(const Step& v1, const Step& v2) { //注意：本函数的参数的
     return v1.value < v2.value;//升序排列
 }
 // 两步的
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board) {
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19]) {
     // std::vector<Step>::iterator it;
     std::vector<Point_1> validCondition;
     std::vector<Point_1>::iterator ite;
