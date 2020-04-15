@@ -56,7 +56,9 @@ struct Step { //步结构
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 int mySide = BLACK; // 方便起见,增加我方
 // definition:
-void copyStep(Step to, Step from);
+// definition:
+void initialize(Step& S);
+void copyStep(Step& to, Step& from);
 bool sortByM1(const Step& v1, const Step& v2);
 bool isInRange(int x, int y);
 int evaluate(int computerside, int simuBoard[19][19]);
@@ -71,12 +73,19 @@ int placeNotEmpty(int simuBoard[19][19]);
 //int whoWin(int side = mySide, int simuBoard[19][19]);
 bool hasNeighbor(int x, int y, int simuBoard[19][19]);
 int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int flag_1);
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]);
 Step* aGoodStep(int depth);
-
-//横向储存
-void ROW(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void ROW(int path[8], int sim[19][19], int m, int n, int color);
+void COL(int path[8], int sim[19][19], int m, int n, int color);
+void Diagonal(int path[8], int sim[19][19], int m, int n, int color);
+void exDiagonal(int path[8], int sim[19][19], int m, int n, int color);
+int compare7(int path[7]);
+int compare8(int path[8]);
+void numberReturn(int simuBoard[19][19], int color, int CS[8]);
+int ifwin(int simuBoard[19][19], int computerside);
+int evaluate(int computerside, int simuBoard[19][19] = Board);//整体局面估分
+void ROW(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -95,7 +104,7 @@ void ROW(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void COL(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void COL(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -114,7 +123,7 @@ void COL(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void Diagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void Diagonal(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -133,7 +142,7 @@ void Diagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void exDiagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void exDiagonal(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -179,6 +188,7 @@ int compare8(int path[8])
     if (r == 1) return 1;
     r = equal(path, path + 8, A5_3);
     if (r == 1) return 1;
+
     int S5_1[8] = { -1,1,1,1,1,1,0 };
     int S5_2[8] = { 0,1,1,1,1,1,-1 };
     r = equal(path, path + 8, S5_1);
@@ -268,6 +278,7 @@ int compare8(int path[8])
         }
         if (num == 3 && n == 3) return 5;
     }
+
     if (path[7] == -1 || path[6] == -1)
     {
         int num = 0;
@@ -326,7 +337,8 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
-void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
+
+void numberReturn(int simuBoard[19][19], int color, int CS[8])
 {
     int number = 0;
     int num = 0;
@@ -336,7 +348,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            ROW(path, i, j, color, simuBoard);
+            ROW(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -350,7 +362,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 19; j++)
         {
-            COL(path, i, j, color, simuBoard);
+            COL(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -364,7 +376,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            Diagonal(path, i, j, color), simuBoard;
+            Diagonal(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -378,7 +390,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            exDiagonal(path, i, j, color, simuBoard);
+            exDiagonal(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -388,11 +400,111 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     }
     return;
 }
-int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估分
+int ifwin(int simuBoard[19][19], int computerside)
+{
+    int path[6] = { -1,-1,-1,-1,-1,-1 };
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 13; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i][j + k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //横向判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 0; j < 19; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //纵向判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 0; j < 13; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j + k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //对角线判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 5; j < 19; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j - k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //另一个对角线
+    return 0;
+}
+int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
 {
     int CS[8] = { 0,0,0,0,0,0,0,0 };
     int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
     int path[7] = { 0,0,0,0,0,0,0 };
+    int flag = 0;
+    flag = ifwin(simuBoard, computerside);
+    if (flag == 1) return 500000000;
     for (int i = 0; i < 19; i++)
     {
         for (int j = 0; j < 12; j++)
@@ -441,7 +553,7 @@ int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估�
             if (r != -1) CS[r]++;
         }
     }
-    numberReturn(computerside, CS, simuBoard);
+    numberReturn(simuBoard, computerside, CS);
     int score = 0;
     for (int i = 0; i < 8; i++)
     {
@@ -450,7 +562,7 @@ int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估�
     return score;
 }
 
-void copyStep(Step to, Step from) { // 对Step进行数值拷贝
+void copyStep(Step& to, Step& from) { // 对Step进行数值拷贝
     to.first.x = from.first.x;
     to.first.y = from.first.y;
     to.second.x = from.second.x;
@@ -463,10 +575,10 @@ int placeNotEmpty(int simuBoard[19][19] = Board) {
     int cnt = 0;
     re(i, 0, 19)
         re(j, 0, 19) {
-        if (simuBoard[i][j] != EMPTY) {
-            ++cnt;
+            if (simuBoard[i][j] != EMPTY) {
+                ++cnt;
+            }
         }
-    }
     return cnt;
 }
 
@@ -481,75 +593,71 @@ int whoWin(int side = mySide, int simuBoard[19][19] = Board) { // 返回值1:sid
     int cnt = 0;
     re(i, 0, 19)
         re(j, 0, 19) { // 每点遍历
-        if (simuBoard[i][j] == mySide) { // 看我方执棋是否六连
-            re(k, 0, 4) { // 四个方向
-                cnt = 0;
-                re(l, 0, 6) { //第几颗连子
-                    if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
-                        if (simuBoard[i + k * dir[k][0]][j + k * dir[k][1]] != mySide) {
-                            break;
+            if (simuBoard[i][j] == mySide) { // 看我方执棋是否六连
+                re(k, 0, 4) { // 四个方向
+                    cnt = 0;
+                    re(l, 0, 6) { //第几颗连子
+                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+                            if (simuBoard[i + k * dir[k][0]][j + k * dir[k][1]] != mySide) {
+                                break;
+                            }
+                            else ++cnt; // 连子数+1
                         }
-                        else ++cnt; // 连子数+1
+                        else break; // 出现界外
+                        if (cnt == 6)
+                            return 1;
                     }
-                    else break; // 出现界外
-                    if (cnt == 6)
-                        return 1;
+                }
+            }
+            else if (simuBoard[i][j] == 1 - mySide) {
+                re(k, 0, 4) {// 四个方向
+                    cnt = 0;
+                    re(l, 0, 6) {
+                        if (isInRange(i + l * dir[k][0], j + k * dir[k][1])) {
+                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - mySide) {
+                                break;
+                            }
+                            else ++cnt; // 连子数+1
+                        }
+                        else break; // 出现界外
+                        if (cnt == 6)
+                            return -1;
+                    }
                 }
             }
         }
-        else if (simuBoard[i][j] == 1 - mySide) {
-            re(k, 0, 4) {// 四个方向
-                cnt = 0;
-                re(l, 0, 6) {
-                    if (isInRange(i + l * dir[k][0], j + k * dir[k][1])) {
-                        if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - mySide) {
-                            break;
-                        }
-                        else ++cnt; // 连子数+1
-                    }
-                    else break; // 出现界外
-                    if (cnt == 6)
-                        return -1;
-                }
-            }
-        }
-    }
     return 0; // 未决出胜负
 }
-
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board) { // 存储合法的走法
     int direction_x[7] = { 0, 1, 2, 3, -1, -2, -3 };
     int direction_y[7] = { 0, 1, 2, 3, -1, -2, -3 };
     for (int i = 0; i < 7; i++)
         for (int j = 1; j < 7; j++)
-            if (((y + direction_y[j]) >= 0) && ((y + direction_y[j]) < 19) && ((x + direction_x[i]) >= 0) && ((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
+            if (((y + direction_y[j]) < 19) && ((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
                 return true;
     for (int i = 1; i < 7; i++)
-        if (((x + direction_x[i]) < 19) && ((x + direction_x[i]) >= 0) && (simuBoard[x + direction_x[i]][y] != EMPTY))
+        if (((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y] != EMPTY))
             return true;
     return false;
 }
 int getValue(int x, int y, int computerSide, int simuBoard[19][19] = Board) { // 棋盘修改为局部变量
     if (computerSide == BLACK) {
-        simuBoard[x][y] = BLACK;
+        simuBoard[x][y] = 0;
         int score = evaluate(computerSide, simuBoard);
-        simuBoard[x][y] = EMPTY;
+        simuBoard[x][y] = 2;
         return score;
     }
-    simuBoard[x][y] = WHITE;
+    simuBoard[x][y] = 1;
     int score = evaluate(computerSide, simuBoard);
-    simuBoard[x][y] = EMPTY;
+    simuBoard[x][y] = 2;
     return score;
 
 }
 bool sortByM1(const Step& v1, const Step& v2) { //注意：本函数的参数的类型一定要与vector中元素的类型一致
-    return v1.value > v2.value; // 降序排列
-}
-bool sortByM2(const Step& v1, const Step& v2) { //注意：本函数的参数的类型一定要与vector中元素的类型一致
-    return v1.value < v2.value; // 升序排列
+    return v1.value < v2.value;//升序排列
 }
 // 两步的
-vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int flag_1) {
+vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board) {
     // std::vector<Step>::iterator it;
     std::vector<Point_1> validCondition;
     std::vector<Point_1>::iterator ite;
@@ -562,7 +670,7 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int 
     //寻找可以下的点
     vector<Step>* toReturn = new vector<Step>;
     for (int i = 0; i < 19; i++)
-        for (int j = 0; j < 19; j++) {//我不知道之前为啥写成1，但看起来j初始值为0更对一点
+        for (int j = 1; j < 19; j++) {
             if (simuBoard[i][j] == 2) {
                 if (hasNeighbor(i, j, simuBoard)) {
                     int temp = getValue(i, j, computerSide, simuBoard);
@@ -586,13 +694,10 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board, int 
             toReturn->push_back(temp);
         }
     //将toReturn里面的元素按评估分数升序排列
-    if (flag_1 == 0){
-        std::sort(toReturn->begin(), toReturn->end(), sortByM1);
-         return toReturn;
-    }
-    std::sort(toReturn->begin(), toReturn->end(), sortByM2);
+    std::sort(toReturn->begin(), toReturn->end(), sortByM1);
     return toReturn;
 }
+
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19] = Board) {
     // TODO: 出现平局、胜负情况下的判定返回,即没有child的情况
     // FIXME: 确定whoWin的参数是mySide还是whosTurn
@@ -640,13 +745,6 @@ int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19] 
         subBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
     }
     return highestScore;
-}
-
-void initialize(Step& S) {
-    S.first.x = 0;
-    S.first.y = 0;
-    S.second.x = 0;
-    S.second.y = 0;
 }
 Step* aGoodStep(int depth) {
     //    Step move;
