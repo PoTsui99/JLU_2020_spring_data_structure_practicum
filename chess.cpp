@@ -9,7 +9,6 @@
 #include<algorithm>
 #include <cstring>
 #include <memory>
-
 #define BLACK 0
 #define WHITE 1
 #define EMPTY 2
@@ -46,7 +45,7 @@ int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY �
 int mySide = BLACK; // 方便起见,增加我方
 // definition:
 void initialize(Step& S);
-void copyStep(Step to, Step from);
+void copyStep(Step& to, Step& from);
 bool sortByM1(const Step& v1, const Step& v2);
 bool isInRange(int x, int y);
 int evaluate(int computerside, int simuBoard[19][19]);
@@ -440,7 +439,7 @@ int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估�
     return score;
 }
 
-void copyStep(Step to, Step from) { // 对Step进行数值拷贝
+void copyStep(Step& to, Step& from) { // 对Step进行数值拷贝
     to.first.x = from.first.x;
     to.first.y = from.first.y;
     to.second.x = from.second.x;
@@ -575,23 +574,16 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19] = Board) {
     std::sort(toReturn->begin(), toReturn->end(), sortByM1);
     return toReturn;
 }
-void initialize(Step& S) {
-    S.first.x = 0;
-    S.first.y = 0;
-    S.second.x = 0;
-    S.second.y = 0;
-}
+
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19] = Board) {
-    // TODO: 出现平局、胜负情况下的判定返回,即没有child的情况
-    // FIXME: 确定whoWin的参数是mySide还是whosTurn
-    //平局
+    // 检测到平局
     if (whoWin(whosTurn, simuBoard) == 0 && placeNotEmpty(simuBoard) == 19 * 19)
         return 0;
-    // FIXME: 返回值取决于评估值的上限
+    // 检测到胜局
     else if (whoWin(whosTurn, simuBoard) == 1) {
         return INF;
     }
-    // FIXME: 返回值取决于评估值的下限
+    // 检测到输局
     else if (whoWin(whosTurn, simuBoard) == -1) {
         return (-1) * INF;
     }
@@ -627,19 +619,19 @@ Step* aGoodStep(int depth) {
     int beta = INF;
     int possibleScore = nonSenseInt;
     Step candidateMove; // 存储暂时评分最高的一步
-    initialize(candidateMove);
     auto simuBoard = new int[19][19];
     memcpy(simuBoard, Board, sizeof(int[19][19]));
     vector<Step>* toMove = generateMove(mySide, simuBoard); // 可下的全部位子
-//    re(i,0,(*toMove).size()){
-//        cout << "当前评估局面落子:";
-//        cout << "(" << (*toMove)[i].first.x << "," << (*toMove)[i].first.y << ")";
-//        cout << "(" << (*toMove)[i].second.x << "," << (*toMove)[i].second.y << ")";
-//        cout << " value: " << (*toMove)[i].value;
-//        cout << endl;
-//    }
+    copyStep(candidateMove, (*toMove)[0]);
+    //    re(i,0,(*toMove).size()){
+    //        cout << "当前评估局面落子:";
+    //        cout << "(" << (*toMove)[i].first.x << "," << (*toMove)[i].first.y << ")";
+    //        cout << "(" << (*toMove)[i].second.x << "," << (*toMove)[i].second.y << ")";
+    //        cout << " value: " << (*toMove)[i].value;
+    //        cout << endl;
+    //    }
 
-    // FIXME: 这里的逻辑其实不是特别清楚
+        // FIXME: 这里的逻辑其实不是特别清楚
     re(i, 0, (*toMove).size()) { // 对全部可下位子进行评估(非静态)
         // move
         simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = mySide;
