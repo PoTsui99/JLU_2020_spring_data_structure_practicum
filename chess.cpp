@@ -56,8 +56,8 @@ void exDiagonal(int path[8], int m, int n, int color, int sim[19][19]);
 int compare7(int path[7]);
 int compare8(int path[8]);
 void numberReturn(int color, int CS[8], int simuBoard[19][19]);
-int placeNotEmpty(int simuBoard[19][19]);
-//int whoWin(int side = mySide, int simuBoard[19][19]);
+int placeNotEmpty(int simuBoard[19][19] = Board);
+int whoWin(int side = mySide, int simuBoard[19][19] = Board);
 bool hasNeighbor(int x, int y, int simuBoard[19][19]);
 int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
 vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
@@ -490,7 +490,7 @@ int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
     int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
     int path[7] = { 0,0,0,0,0,0,0 };
     int flag = 0;
-    flag = ifwin(simuBoard, computerside);
+    flag = whoWin(computerside, simuBoard);
     if (flag == 1) return 500000000;
     for (int i = 0; i < 19; i++)
     {
@@ -558,7 +558,7 @@ void copyStep(Step& to, Step& from) { // 对Step进行数值拷贝
 bool isInRange(int x, int y) {
     return (x >= 0 && x < 19 && y >= 0 && y < 19);
 }
-int placeNotEmpty(int simuBoard[19][19] = Board) {
+int placeNotEmpty(int simuBoard[19][19]) {
     int cnt = 0;
     re(i, 0, 19)
         re(j, 0, 19) {
@@ -569,7 +569,7 @@ int placeNotEmpty(int simuBoard[19][19] = Board) {
     return cnt;
 }
 
-int whoWin(int side = mySide, int simuBoard[19][19] = Board) { // 返回值1:side方赢;2:side的反方赢
+int whoWin(int side, int simuBoard[19][19]) { // 返回值1:side方赢;2:side的反方赢
     /* (0,0) (0,1) (0,2)....
      * .
      * .
