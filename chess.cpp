@@ -570,7 +570,7 @@ int placeNotEmpty(int simuBoard[19][19]) {
     return cnt;
 }
 
-int whoWin(int side, int simuBoard[19][19]) { // 返回值1:side方赢;2:side的反方赢
+int whoWin(int side, int simuBoard[19][19]) { // 返回1为我方赢,-1为地方赢
     /* (0,0) (0,1) (0,2)....
      * .
      * .
@@ -580,42 +580,39 @@ int whoWin(int side, int simuBoard[19][19]) { // 返回值1:side方赢;2:side的
 
     int cnt = 0;
     re(i, 0, 19)
-        re(j, 0, 19) { // 每点遍历
-        if (simuBoard[i][j] == mySide) { // 看我方执棋是否六连
-            re(k, 0, 4) { // 四个方向
-                cnt = 0;
-                re(l, 0, 6) { //第几颗连子 
-                    if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
-                        if (simuBoard[i + k * dir[k][0]][j + k * dir[k][1]] != mySide) {
-                            break;
-                        }
-                        else ++cnt; // 连子数+1
+        re(j, 0, 19) { // 遍历
+            if (simuBoard[i][j] == side) { // 发现我方子
+                re(k, 0, 4) { // 四个方向
+                    cnt = 0;
+                    re(l, 0, 6) { // 循环,查看六连否
+                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != side) {
+                                break;
+                            } else ++cnt; // 计数器+1
+                        } else break; // 超界
+                        if (cnt == 6)
+                            return 1;
                     }
-                    else break; // 出现界外
-                    if (cnt == 6)
-                        return 1;
+                }
+            }
+            else if (simuBoard[i][j] == 1 - side) {
+                re(k, 0, 4) {
+                    cnt = 0;
+                    re(l, 0, 6) {
+                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - side) {
+                                break;
+                            } else ++cnt; 
+                        } else break; 
+                        if (cnt == 6)
+                            return -1;
+                    }
                 }
             }
         }
-        else if (simuBoard[i][j] == 1 - mySide) {
-            re(k, 0, 4) {// 四个方向
-                cnt = 0;
-                re(l, 0, 6) {
-                    if (isInRange(i + l * dir[k][0], j + k * dir[k][1])) {
-                        if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - mySide) {
-                            break;
-                        }
-                        else ++cnt; // 连子数+1
-                    }
-                    else break; // 出现界外
-                    if (cnt == 6)
-                        return -1;
-                }
-            }
-        }
-    }
-    return 0; // 未决出胜负
+    return 0; // 未分胜负
 }
+
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board) { // 存储合法的走法
     int direction_x[7] = { 0, 1, 2, 3, -1, -2, -3 };
     int direction_y[7] = { 0, 1, 2, 3, -1, -2, -3 };
