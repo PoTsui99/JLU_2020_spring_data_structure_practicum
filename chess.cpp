@@ -28,7 +28,11 @@
 #define re(i,a,b) for(int i=a;i<b;++i)
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
+
 using namespace std;
+fstream fout("debug.out");
+#define cout fout
+
 
 struct Point { //点结构
     int x, y;
@@ -44,12 +48,13 @@ struct Step { //步结构
 // global:
 int Board[19][19]; //存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 int mySide = BLACK; // 方便起见,增加我方
+Step toGo;
+int maxDepth = 3;
 // definition:
 void initialize(Step& S);
 void copyStep(Step& to, Step& from);
 bool sortByM1(const Step& v1, const Step& v2);
 bool isInRange(int x, int y);
-int evaluate(int computerside, int simuBoard[19][19]);
 void ROW(int path[8], int m, int n, int color, int sim[19][19]);
 void COL(int path[8], int m, int n, int color, int sim[19][19]);
 void Diagonal(int path[8], int m, int n, int color, int sim[19][19]);
@@ -63,7 +68,7 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19]);
 int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
 vector<Step>* generateMove(int computerSide, int simuBoard[19][19]=Board);
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]);
-Step* aGoodStep(int depth);
+void aGoodStep(int depth);
 void ROW(int path[8], int sim[19][19], int m, int n, int color);
 void COL(int path[8], int sim[19][19], int m, int n, int color);
 void Diagonal(int path[8], int sim[19][19], int m, int n, int color);
@@ -94,7 +99,7 @@ void ROW(int path[8], int sim[19][19], int m, int n, int color)
 }
 void COL(int path[8], int sim[19][19], int m, int n, int color)
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 8; i++)
     {
         path[i] = sim[m + i][n];
         if (path[i] == 2)
@@ -374,9 +379,9 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
 
     }
     //斜向判断
-    for (int i = 8; i < 19; i++)
+    for (int i = 0; i < 11; i++)
     {
-        for (int j = 0; j < 11; j++)
+        for (int j = 7; j < 19; j++)
         {
             exDiagonal(path, simuBoard, i, j, color);
             r = compare8(path);
@@ -388,111 +393,11 @@ void numberReturn(int simuBoard[19][19], int color, int CS[8])
     }
     return;
 }
-int ifwin(int simuBoard[19][19], int computerside)
-{
-    int path[6] = { -1,-1,-1,-1,-1,-1 };
-    for (int i = 0; i < 19; i++)
-    {
-        for (int j = 0; j < 13; j++)
-        {
-            if (simuBoard[i][j] == computerside)
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    path[k] = simuBoard[i][j + k];
-                    if (path[k] != computerside) break;
-                    if (k == 5 && path[k] == computerside)
-                    {
-                        return 1;
-                    }
-                }
-            }
-            for (int k = 0; k < 6; k++)
-            {
-                path[k] = -1;
-            }
-        }
-    }
-    //横向判断
-    for (int i = 0; i < 13; i++)
-    {
-        for (int j = 0; j < 19; j++)
-        {
-            if (simuBoard[i][j] == computerside)
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    path[k] = simuBoard[i + k][j];
-                    if (path[k] != computerside) break;
-                    if (k == 5 && path[k] == computerside)
-                    {
-                        return 1;
-                    }
-                }
-            }
-            for (int k = 0; k < 6; k++)
-            {
-                path[k] = -1;
-            }
-        }
-    }
-    //纵向判断
-    for (int i = 0; i < 13; i++)
-    {
-        for (int j = 0; j < 13; j++)
-        {
-            if (simuBoard[i][j] == computerside)
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    path[k] = simuBoard[i + k][j + k];
-                    if (path[k] != computerside) break;
-                    if (k == 5 && path[k] == computerside)
-                    {
-                        return 1;
-                    }
-                }
-            }
-            for (int k = 0; k < 6; k++)
-            {
-                path[k] = -1;
-            }
-        }
-    }
-    //对角线判断
-    for (int i = 0; i < 13; i++)
-    {
-        for (int j = 5; j < 19; j++)
-        {
-            if (simuBoard[i][j] == computerside)
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    path[k] = simuBoard[i + k][j - k];
-                    if (path[k] != computerside) break;
-                    if (k == 5 && path[k] == computerside)
-                    {
-                        return 1;
-                    }
-                }
-            }
-            for (int k = 0; k < 6; k++)
-            {
-                path[k] = -1;
-            }
-        }
-    }
-    //另一个对角线
-    return 0;
-}
 int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
 {
     int CS[8] = { 0,0,0,0,0,0,0,0 };
     int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
     int path[7] = { 0,0,0,0,0,0,0 };
-    int flag = 0;
-    flag = whoWin(computerside, simuBoard);
-    if (flag == 1) return 500000000;
     for (int i = 0; i < 19; i++)
     {
         for (int j = 0; j < 12; j++)
@@ -517,7 +422,7 @@ int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
             if (r != -1) CS[r]++;
         }
     }
-    for (int i = 0; i < 19; i++)
+    for (int i = 0; i < 12; i++)
     {
         for (int j = 0; j < 12; j++)
         {
@@ -529,13 +434,13 @@ int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
             if (r != -1) CS[r]++;
         }
     }
-    for (int i = 7; i < 19; i++)
+    for (int i = 0; i < 12; i++)
     {
-        for (int j = 0; j < 12; j++)
+        for (int j = 7; j < 19; j++)
         {
             for (int k = 0; k < 7; k++)
             {
-                path[k] = simuBoard[i - k][j + k];
+                path[k] = simuBoard[i + k][j - k];
             }
             int r = compare7(path);
             if (r != -1) CS[r]++;
@@ -549,7 +454,6 @@ int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
     }
     return score;
 }
-
 void copyStep(Step& to, Step& from) { // 对Step进行数值拷贝
     to.first.x = from.first.x;
     to.first.y = from.first.y;
@@ -569,7 +473,6 @@ int placeNotEmpty(int simuBoard[19][19]) {
     }
     return cnt;
 }
-
 int whoWin(int side, int simuBoard[19][19]) { // 返回1为我方赢,-1为地方赢
     /* (0,0) (0,1) (0,2)....
      * .
@@ -696,69 +599,75 @@ int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19] 
         return (-1) * INF;
     }
     if (depth == 0) { // 叶节点
-        return (whosTurn == mySide ? 1 : -1) * evaluate(whosTurn, simuBoard);
+        int rt = ((whosTurn==mySide)?1:-1)*evaluate(whosTurn, simuBoard);
+        return rt;
     }
 
-    int highestScore = (-1) * INF;
+    // int highestScore = (-1) * INF;
     int negaMaxValue = nonSenseInt;
-    auto subBoard = new int[19][19];
-    memcpy(subBoard, simuBoard, sizeof(int[19][19]));
+    //auto subBoard = new int[19][19];
+    //memcpy(subBoard, simuBoard, sizeof(int[19][19]));
     vector<Step>* toMove = generateMove(whosTurn, simuBoard);
     re(i, 0, (*toMove).size()) {
         // move
-        subBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = whosTurn;
-        subBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = whosTurn;
-        negaMaxValue = (-1) * negaMax(1 - whosTurn, depth - 1, (-1) * alpha, (-1) * beta, subBoard);
-        highestScore = max(highestScore, negaMaxValue);
-        alpha = max(alpha, negaMaxValue);
+        simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = whosTurn;
+        simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = whosTurn;
+        negaMaxValue = (-1) * negaMax(1 - whosTurn, depth - 1, (-1) * beta, (-1) * alpha, simuBoard);
+        // highestScore = max(highestScore, negaMaxValue);
+        if (negaMaxValue > alpha) {
+            alpha = negaMaxValue;
+            if (depth == maxDepth) {
+                copyStep(toGo, (*toMove)[i]);
+            }
+        }
         if (alpha >= beta) { // 隐式剪枝
             return alpha;
         }
         // unmove
-        subBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = EMPTY;
-        subBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
-    }
-    return highestScore;
-}
-Step* aGoodStep(int depth) {
-    //    Step move;
-    int highestScore = (-1) * INT_MAX;
-    int alpha = (-1) * INF;
-    int beta = INF;
-    int possibleScore = nonSenseInt;
-    Step candidateMove; // 存储暂时评分最高的一步
-    auto simuBoard = new int[19][19];
-    memcpy(simuBoard, Board, sizeof(int[19][19]));
-    vector<Step>* toMove = generateMove(mySide, simuBoard); // 可下的全部位子
-    copyStep(candidateMove, (*toMove)[0]);
-    //    re(i,0,(*toMove).size()){
-    //        cout << "当前评估局面落子:";
-    //        cout << "(" << (*toMove)[i].first.x << "," << (*toMove)[i].first.y << ")";
-    //        cout << "(" << (*toMove)[i].second.x << "," << (*toMove)[i].second.y << ")";
-    //        cout << " value: " << (*toMove)[i].value;
-    //        cout << endl;
-    //    }
-
-        // FIXME: 这里的逻辑其实不是特别清楚
-    re(i, 0, (*toMove).size()) { // 对全部可下位子进行评估(非静态)
-        // move
-        simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = mySide;
-        simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = mySide;
-        //这些局面实际上是min层
-        possibleScore = (-1) * negaMax(1 - mySide, depth, alpha, beta, simuBoard);
-        if (possibleScore > highestScore) {
-            highestScore = possibleScore;
-            copyStep(candidateMove, (*toMove)[i]);
-        }
-
-        // unmove
         simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = EMPTY;
         simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
     }
-    delete(simuBoard);
-    Step* rt = new Step(candidateMove);
+    return alpha;
+}
+void aGoodStep(int depth) {
+    //    Step move;
+    //int highestScore = (-1) * INT_MAX;
+    int alpha = (-1) * INF;
+    int beta = INF;
+    //int possibleScore = nonSenseInt;
+    auto simuBoard = new int[19][19];
+    memcpy(simuBoard, Board, sizeof(int[19][19]));
+    vector<Step>* toMove = generateMove(mySide, simuBoard); // 可下的全部位子
+    copyStep(toGo, (*toMove)[0]);
+    negaMax(mySide, depth, alpha, beta, simuBoard);
+//    re(i,0,(*toMove).size()){
+//        cout << "当前评估局面落子:";
+//        cout << "(" << (*toMove)[i].first.x << "," << (*toMove)[i].first.y << ")";
+//        cout << "(" << (*toMove)[i].second.x << "," << (*toMove)[i].second.y << ")";
+//        cout << " value: " << (*toMove)[i].value;
+//        cout << endl;
+//    }
 
-    return rt;
+    //re(i, 0, (*toMove).size()) { // 对全部可下位子进行评估(非静态)
+    //    // move
+    //    cout << (*toMove)[i].first.x << "&" << (*toMove)[i].first.y << "&" << (*toMove)[i].second.x << "&" << (*toMove)[i].second.y << endl;
+    //    simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = mySide;
+    //    simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = mySide;
+    //    //这些局面实际上是min层
+    //    possibleScore = (-1) * negaMax(1 - mySide, depth, alpha, beta, simuBoard);
+    //    cout << "这个局面的估值为: " << possibleScore << endl;
+    //    if (possibleScore > highestScore) {
+    //        highestScore = possibleScore;
+    //        copyStep(candidateMove, (*toMove)[i]);
+    //    }
+    //    //cout << endl << "还剩" << (*toMove).size() - i - 1 << "个未评估." << endl;
+    //    /*cout << "当前candidateMove: (" << candidateMove.first.x << "," << candidateMove.first.y << ")";
+    //    cout << ", (" << candidateMove.second.x << "," << candidateMove.second.y << ")" << endl;*/
+    //    // unmove
+    //    simuBoard[(*toMove)[i].first.x][(*toMove)[i].first.y] = EMPTY;
+    //    simuBoard[(*toMove)[i].second.x][(*toMove)[i].second.y] = EMPTY;
+    //}
+    delete(simuBoard);
 }
 
 int main()
@@ -827,10 +736,12 @@ int main()
 
             mySide = computerSide;
             // TODO: 决定搜索深度
-            int depth = 3;
-            Step* toMove = aGoodStep(depth);
-            Board[(*toMove).first.x][(*toMove).first.y] = computerSide;
-            Board[(*toMove).second.x][(*toMove).second.y] = computerSide;
+            maxDepth = 3;
+            aGoodStep(maxDepth);
+            
+            // toMove = aGoodStep(maxDepth);
+            Board[toGo.first.x][toGo.first.y] = computerSide;
+            Board[toGo.second.x][toGo.second.y] = computerSide;
             //            //生成第1子落子位置step.first.x和step.first.y
             //            int x, y;
             //            x = rand() % 19; y = rand() % 19;
