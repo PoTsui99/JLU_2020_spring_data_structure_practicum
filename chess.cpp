@@ -63,9 +63,16 @@ int getValue(int x, int y, int computerSide, int simuBoard[19][19]);
 vector<Step>* generateMove(int computerSide, int simuBoard[19][19]);
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]);
 Step* aGoodStep(int depth);
-
-//横向储存
-void ROW(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void ROW(int path[8], int sim[19][19], int m, int n, int color);
+void COL(int path[8], int sim[19][19], int m, int n, int color);
+void Diagonal(int path[8], int sim[19][19], int m, int n, int color);
+void exDiagonal(int path[8], int sim[19][19], int m, int n, int color);
+int compare7(int path[7]);
+int compare8(int path[8]);
+void numberReturn(int simuBoard[19][19], int color, int CS[8]);
+int ifwin(int simuBoard[19][19], int computerside);
+int evaluate(int computerside, int simuBoard[19][19] = Board);//整体局面估分
+void ROW(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -84,7 +91,7 @@ void ROW(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void COL(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void COL(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -103,7 +110,7 @@ void COL(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void Diagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void Diagonal(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -122,7 +129,7 @@ void Diagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
         }
     }
 }
-void exDiagonal(int path[8], int m, int n, int color, int sim[19][19] = Board)
+void exDiagonal(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -168,6 +175,7 @@ int compare8(int path[8])
     if (r == 1) return 1;
     r = equal(path, path + 8, A5_3);
     if (r == 1) return 1;
+
     int S5_1[8] = { -1,1,1,1,1,1,0 };
     int S5_2[8] = { 0,1,1,1,1,1,-1 };
     r = equal(path, path + 8, S5_1);
@@ -257,6 +265,7 @@ int compare8(int path[8])
         }
         if (num == 3 && n == 3) return 5;
     }
+
     if (path[7] == -1 || path[6] == -1)
     {
         int num = 0;
@@ -315,7 +324,8 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
-void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
+
+void numberReturn(int simuBoard[19][19], int color, int CS[8])
 {
     int number = 0;
     int num = 0;
@@ -325,7 +335,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            ROW(path, i, j, color, simuBoard);
+            ROW(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -339,7 +349,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 19; j++)
         {
-            COL(path, i, j, color, simuBoard);
+            COL(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -353,7 +363,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            Diagonal(path, i, j, color), simuBoard;
+            Diagonal(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -367,7 +377,7 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     {
         for (int j = 0; j < 11; j++)
         {
-            exDiagonal(path, i, j, color, simuBoard);
+            exDiagonal(path, simuBoard, i, j, color);
             r = compare8(path);
             if (r != -1)
             {
@@ -377,11 +387,111 @@ void numberReturn(int color, int CS[8], int simuBoard[19][19] = Board)
     }
     return;
 }
-int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估分
+int ifwin(int simuBoard[19][19], int computerside)
+{
+    int path[6] = { -1,-1,-1,-1,-1,-1 };
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 13; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i][j + k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //横向判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 0; j < 19; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //纵向判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 0; j < 13; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j + k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //对角线判断
+    for (int i = 0; i < 13; i++)
+    {
+        for (int j = 5; j < 19; j++)
+        {
+            if (simuBoard[i][j] == computerside)
+            {
+                for (int k = 0; k < 6; k++)
+                {
+                    path[k] = simuBoard[i + k][j - k];
+                    if (path[k] != computerside) break;
+                    if (k == 5 && path[k] == computerside)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            for (int k = 0; k < 6; k++)
+            {
+                path[k] = -1;
+            }
+        }
+    }
+    //另一个对角线
+    return 0;
+}
+int evaluate(int computerside, int simuBoard[19][19])//整体局面估分
 {
     int CS[8] = { 0,0,0,0,0,0,0,0 };
     int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
     int path[7] = { 0,0,0,0,0,0,0 };
+    int flag = 0;
+    flag = ifwin(simuBoard, computerside);
+    if (flag == 1) return 500000000;
     for (int i = 0; i < 19; i++)
     {
         for (int j = 0; j < 12; j++)
@@ -430,7 +540,7 @@ int evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估�
             if (r != -1) CS[r]++;
         }
     }
-    numberReturn(computerside, CS, simuBoard);
+    numberReturn(simuBoard, computerside, CS);
     int score = 0;
     for (int i = 0; i < 8; i++)
     {
