@@ -583,10 +583,10 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board) { // 存储合法�
     int direction_y[7] = { 0, 1, 2, 3, -1, -2, -3 };
     for (int i = 0; i < 7; i++)
         for (int j = 1; j < 7; j++)
-            if (((y + direction_y[j]) < 19) && ((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
+            if (((y + direction_y[j]) < 19) && ((x + direction_x[i]) < 19) && ((x + direction_x[i]) >= 0) && (((y + direction_y[j]) >=0 ))&& (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
                 return true;
     for (int i = 1; i < 7; i++)
-        if (((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y] != EMPTY))
+        if (((x + direction_x[i]) < 19) && ((x + direction_x[i]) >= 0)&& (simuBoard[x + direction_x[i]][y] != EMPTY))
             return true;
     return false;
 }
