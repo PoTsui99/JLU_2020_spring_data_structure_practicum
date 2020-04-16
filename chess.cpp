@@ -400,7 +400,7 @@ int evaluate(int computerside, int myBoard[19][19])//整体局面估分
         return -5000000;
     }
     int CS[8] = { 0,0,0,0,0,0,0,0 };
-    int value[8] = { 10000000,10000000,500000,70000,9000,1100,550,60 };
+    int value[8] = { 100000000,100000000,500000,20000,5000,1100,550,60 };
     int path[7] = { 0,0,0,0,0,0,0 };
     int path6[6] = { 0,0,0,0,0,0 };
     for (int i = 0; i < 19; i++)
@@ -648,6 +648,7 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19]) {
     return toReturn;
 }
 int negaMax(int whosTurn, int depth, int alpha, int beta, int simuBoard[19][19]) {
+    cout << "进行一次negamax" << endl;
     int flag = whoWin(whosTurn, simuBoard);
     // 检测到平局
     if (flag == 0 && placeNotEmpty(simuBoard) == 19 * 19)
@@ -801,10 +802,9 @@ int main()
             /**************************************在下方填充代码，并替换我的示例代码*****************************************/
 
             vector<Step>* candidate = generateMove(computerSide,Board);
-//            copyStep(step,(*candidate)[0]);
+            copyStep(step,(*candidate)[0]);
             aGoodStep(1);
             copyStep(step,toGo);
-            fout << "generateMove的大小为:" << (*candidate).size() << endl;
             //生成第1子落子位置step.first.x和step.first.y
 //            int x, y;
 //            x = rand() % 19; y = rand() % 19;
