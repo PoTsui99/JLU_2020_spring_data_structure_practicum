@@ -78,6 +78,15 @@ int compare8(int path[8]);
 void numberReturn(int simuBoard[19][19], int color, int CS[8]);
 int ifwin(int simuBoard[19][19], int computerside);
 int evaluate(int computerside, int myBoard[19][19]);//整体局面估分
+#include<iostream>
+#include<string>
+#include<cmath>
+#include<algorithm>
+#define BLACK 0
+#define WHITE 1
+#define EMPTY 2
+using namespace std;
+int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 void ROW(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
@@ -282,6 +291,7 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
+
 void numberReturn(int simuBoard[19][19], int color, int CS[8])
 {
     int number = 0;
@@ -388,19 +398,10 @@ int compare6(int path[6], int color, int CS[8])
     if (number == 0) return -1;
     return -1;
 }
-int evaluate(int computerside, int myBoard[19][19])//整体局面估分
+int final_evaluate(int computerside, int simuBoard[19][19] = Board)//整体局面估分
 {
-    auto simuBoard = new int[19][19];
-    memcpy(simuBoard,myBoard,sizeof(int[19][19]));
-    int _flag = whoWin(computerside,simuBoard);
-    if(_flag == 1){
-        return 5000000;
-    }
-    else if(_flag == -1){
-        return -5000000;
-    }
     int CS[8] = { 0,0,0,0,0,0,0,0 };
-    int value[8] = { 100000000,100000000,500000,20000,5000,1100,550,60 };
+    int value[8] = { 10000000,10000000,500000,70000,9000,1100,550,60 };
     int path[7] = { 0,0,0,0,0,0,0 };
     int path6[6] = { 0,0,0,0,0,0 };
     for (int i = 0; i < 19; i++)
@@ -512,6 +513,16 @@ int evaluate(int computerside, int myBoard[19][19])//整体局面估分
     }
     return score;
 }
+int evaluate(int computerside, int simuBoard[19][19] = Board)
+{
+    int myscore = final_evaluate(computerside, simuBoard);
+    int yourcolor = 0;
+    if (computerside == 1) yourcolor = 0;
+    else yourcolor = 1;
+    int yourscore = final_evaluate(yourcolor, simuBoard);
+    return myscore - yourscore;
+}//我方估分-对方估分
+
 void copyStep(Step& to, Step& from) { // 对Step进行数值拷贝
     to.first.x = from.first.x;
     to.first.y = from.first.y;
@@ -800,7 +811,7 @@ int main()
             /**********************************************************************************************************/
             /***生成落子的坐标，保存在step结构中，第1子下在(step.first.x,step.first.y)，第2子下在(step.first.x,step.first.y)*****/
             /**************************************在下方填充代码，并替换我的示例代码*****************************************/
-
+            mySide = computerSide;
             vector<Step>* candidate = generateMove(computerSide,Board);
             copyStep(step,(*candidate)[0]);
             aGoodStep(1);
