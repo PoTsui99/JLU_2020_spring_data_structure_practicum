@@ -15,16 +15,7 @@
 #define EMPTY 2
 #define INF INT_MAX
 #define nonSenseInt -1
-// #define C6 1000000
-// #define A5 100000
-// #define S5 50000
-// //#define A4 50000
-// #define S4 10000
-// #define A3 10000
-// #define I3 5000
-// #define S3 1000
-// #define A2 100
-// #define S2 10
+
 #define re(i,a,b) for(int i=a;i<b;++i)
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
