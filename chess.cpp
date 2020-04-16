@@ -78,15 +78,6 @@ int compare8(int path[8]);
 void numberReturn(int simuBoard[19][19], int color, int CS[8]);
 int ifwin(int simuBoard[19][19], int computerside);
 int evaluate(int computerside, int myBoard[19][19]);//整体局面估分
-#include<iostream>
-#include<string>
-#include<cmath>
-#include<algorithm>
-#define BLACK 0
-#define WHITE 1
-#define EMPTY 2
-using namespace std;
-int Board[19][19];//存储棋盘信息，其元素值为 BLACK, WHITE, EMPTY 之一
 void ROW(int path[8], int sim[19][19], int m, int n, int color)
 {
     for (int i = 0; i < 8; i++)
@@ -291,7 +282,6 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
-
 void numberReturn(int simuBoard[19][19], int color, int CS[8])
 {
     int number = 0;
@@ -588,7 +578,6 @@ int whoWin(int side, int simuBoard[19][19]) { // 返回1为我方赢,-1为地方
         }
     return 0; // 未分胜负
 }
-
 bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board) { // 存储合法的走法
     int direction_x[7] = { 0, 1, 2, 3, -1, -2, -3 };
     int direction_y[7] = { 0, 1, 2, 3, -1, -2, -3 };
@@ -747,6 +736,122 @@ void aGoodStep(int depth) {
 
     return rt;*/
 }
+bool isAvailable(int x,int y,int dx,int dy,int cnt) {
+    re(i,1,6-cnt+1) {
+        if(!isInRange(x-i*dx,y-i*dx)||Board[x-i*dx][y-i*dy]!=EMPTY)
+            return false;
+    }
+    return true;
+}
+void findStep(int side = mySide, int simuBoard[19][19] = Board) {
+    int dir[4][2] = {0, 1, 1, 0, 1, 1, 1, -1};
+
+    int cnt = 0;
+    int maxConnect = 0;
+    Step mem;
+    // initialize
+    re(i, 0, 19)re(j, 0, 18) {
+            if (Board[i][j] == EMPTY && Board[i][j + 1] == EMPTY) {
+                mem.first.x = mem.second.x = i;
+                mem.first.y = j;
+                mem.second.y = j + 1;
+                goto loopOut;
+            }
+        }
+    loopOut:
+    re(i, 0, 19)re(j, 0, 19) { // 遍历
+            if (simuBoard[i][j] == mySide) { // 发现我方子
+                re(k, 0, 4) { // 四个方向
+                    cnt = 0;
+                    re(l, 0, 5) { // 循环,查看连子,最多五个连子
+                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != side) { // 不连了怎么样
+                                // 必胜
+                                if (cnt == 4) {
+                                    if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                        isInRange(i - 2 * dir[k][0], j - 2 * dir[k][1]) &&
+                                        Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY &&
+                                        Board[i - 2 * dir[k][0]][j - 2 * dir[k][1]] == EMPTY) {
+                                        toGo.first.x = i - 1 * dir[k][0];
+                                        toGo.first.y = j - 1 * dir[k][1];
+                                        toGo.second.x = i - 2 * dir[k][0];
+                                        toGo.second.y = j - 2 * dir[k][1];
+                                        return;
+                                    }
+
+                                }
+                                if (cnt == 5) {
+                                    if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                        Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY) {
+                                        toGo.first.x = i - 1 * dir[k][0];
+                                        toGo.first.y = j - 1 * dir[k][1];
+                                        return;
+                                    }
+                                }
+                                if (isAvailable(i, j, dir[k][0], dir[k][1], cnt)) {
+                                    if (cnt > maxConnect) {
+                                        maxConnect = cnt;
+                                        mem.first.x = i - 1 * dir[k][0];
+                                        mem.first.y = j - 1 * dir[k][1];
+                                        mem.second.x = i - 2 * dir[k][0];
+                                        mem.second.y = j - 2 * dir[k][1];
+                                    }
+                                }
+
+                            } else ++cnt; // 在界内且是我方,计数器+1
+                        } else { // 超界了怎么样
+                            if (cnt == 4) {
+                                if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                    isInRange(i - 2 * dir[k][0], j - 2 * dir[k][1]) &&
+                                    Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY &&
+                                    Board[i - 2 * dir[k][0]][j - 2 * dir[k][1]] == EMPTY) {
+                                    toGo.first.x = i - 1 * dir[k][0];
+                                    toGo.first.y = j - 1 * dir[k][1];
+                                    toGo.second.x = i - 2 * dir[k][0];
+                                    toGo.second.y = j - 2 * dir[k][1];
+                                    return;
+                                }
+
+                            }
+                            if (cnt == 5) {
+                                if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                    Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY) {
+                                    toGo.first.x = i - 1 * dir[k][0];
+                                    toGo.first.y = j - 1 * dir[k][1];
+                                    return;
+                                }
+                            }
+                            if (isAvailable(i, j, dir[k][0], dir[k][1], cnt)) {
+                                if (cnt > maxConnect) {
+                                    maxConnect = cnt;
+                                    mem.first.x = i - 1 * dir[k][0];
+                                    mem.first.y = j - 1 * dir[k][1];
+                                    mem.second.x = i - 2 * dir[k][0];
+                                    mem.second.y = j - 2 * dir[k][1];
+                                }
+                            }
+                        }
+                    }
+                }
+            } //else if (simuBoard[i][j] == 1 - side) {
+//                re(k, 0, 4) {
+//                    cnt = 0;
+//                    re(l, 0, 6) {
+//                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
+//                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - side) {
+//                                break;
+//                            } else ++cnt;
+//                        } else break;
+//
+//                    }
+//                }
+//            }
+        }
+    copyStep(toGo,mem);
+    return;
+
+}
+
 int main()
 {
     Step step;//临时步结构
@@ -812,9 +917,10 @@ int main()
             /***生成落子的坐标，保存在step结构中，第1子下在(step.first.x,step.first.y)，第2子下在(step.first.x,step.first.y)*****/
             /**************************************在下方填充代码，并替换我的示例代码*****************************************/
             mySide = computerSide;
-            vector<Step>* candidate = generateMove(computerSide,Board);
-            copyStep(step,(*candidate)[0]);
-            aGoodStep(1);
+            //vector<Step>* candidate = generateMove(computerSide,Board);
+            //copyStep(step,(*candidate)[0]);
+            //aGoodStep(1);
+            findStep();
             copyStep(step,toGo);
             //生成第1子落子位置step.first.x和step.first.y
 //            int x, y;
