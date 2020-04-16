@@ -583,10 +583,10 @@ bool hasNeighbor(int x, int y, int simuBoard[19][19] = Board) { // 存储合法�
     int direction_y[7] = { 0, 1, 2, 3, -1, -2, -3 };
     for (int i = 0; i < 7; i++)
         for (int j = 1; j < 7; j++)
-            if (((y + direction_y[j]) < 19) && ((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
+            if (((y + direction_y[j]) < 19) && ((x + direction_x[i]) < 19) && ((x + direction_x[i]) >= 0) && (((y + direction_y[j]) >=0 ))&& (simuBoard[x + direction_x[i]][y + direction_y[j]] != EMPTY))
                 return true;
     for (int i = 1; i < 7; i++)
-        if (((x + direction_x[i]) < 19) && (simuBoard[x + direction_x[i]][y] != EMPTY))
+        if (((x + direction_x[i]) < 19) && ((x + direction_x[i]) >= 0)&& (simuBoard[x + direction_x[i]][y] != EMPTY))
             return true;
     return false;
 }
@@ -620,7 +620,7 @@ vector<Step>* generateMove(int computerSide, int simuBoard[19][19]) {
     //寻找可以下的点
     vector<Step>* toReturn = new vector<Step>;
     for (int i = 0; i < 19; i++)
-        for (int j = 1; j < 19; j++) {
+        for (int j = 0; j < 19; j++) {
             if (simuBoard[i][j] == 2) {
                 if (hasNeighbor(i, j, simuBoard)) {
                     int temp = getValue(i, j, computerSide, simuBoard);
@@ -736,18 +736,31 @@ void aGoodStep(int depth) {
 
     return rt;*/
 }
-bool isAvailable(int x,int y,int dx,int dy,int cnt) {
-    re(i,1,6-cnt+1) {
-        if(!isInRange(x-i*dx,y-i*dx)||Board[x-i*dx][y-i*dy]!=EMPTY)
-            return false;
+int cnt1 = 0; // 前
+int cnt2 = 0; // 后
+bool isAvailable(int x,int y,int dx,int dy,int cnt, int tar = 6, int side = mySide) { // 需要查两侧
+    cnt1 = 0;
+    cnt2 = 0;
+    int i = 1;
+    while(isInRange(x-i*dx,y-i*dx)&&Board[x-i*dx][y-i*dy]==EMPTY)  {
+        ++cnt1;
+        ++i;
     }
-    return true;
+    i = 1;
+    while(isInRange(x+(cnt-1+i)*dx,y+(cnt-1+i)*dy)&&Board[x+(cnt-1+i)*dx][y+(cnt-1+i)*dy]==EMPTY){
+        ++cnt2;
+        ++i;
+    }
+    if(cnt1+cnt2 >= tar-cnt)
+        return true;
+    else return false;
 }
 void findStep(int side = mySide, int simuBoard[19][19] = Board) {
     int dir[4][2] = {0, 1, 1, 0, 1, 1, 1, -1};
 
     int cnt = 0;
     int maxConnect = 0;
+    int numToBlock = 0;
     Step mem;
     // initialize
     re(i, 0, 19)re(j, 0, 18) {
@@ -760,94 +773,134 @@ void findStep(int side = mySide, int simuBoard[19][19] = Board) {
         }
     loopOut:
     re(i, 0, 19)re(j, 0, 19) { // 遍历
-            if (simuBoard[i][j] == mySide) { // 发现我方子
-                re(k, 0, 4) { // 四个方向
-                    cnt = 0;
-                    re(l, 0, 5) { // 循环,查看连子,最多五个连子
-                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
-                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != side) { // 不连了怎么样
-                                // 必胜
-                                if (cnt == 4) {
-                                    if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
-                                        isInRange(i - 2 * dir[k][0], j - 2 * dir[k][1]) &&
-                                        Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY &&
-                                        Board[i - 2 * dir[k][0]][j - 2 * dir[k][1]] == EMPTY) {
-                                        toGo.first.x = i - 1 * dir[k][0];
-                                        toGo.first.y = j - 1 * dir[k][1];
-                                        toGo.second.x = i - 2 * dir[k][0];
-                                        toGo.second.y = j - 2 * dir[k][1];
-                                        return;
-                                    }
-
-                                }
-                                if (cnt == 5) {
-                                    if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
-                                        Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY) {
-                                        toGo.first.x = i - 1 * dir[k][0];
-                                        toGo.first.y = j - 1 * dir[k][1];
-                                        return;
-                                    }
-                                }
-                                if (isAvailable(i, j, dir[k][0], dir[k][1], cnt)) {
-                                    if (cnt > maxConnect) {
-                                        maxConnect = cnt;
-                                        mem.first.x = i - 1 * dir[k][0];
-                                        mem.first.y = j - 1 * dir[k][1];
-                                        mem.second.x = i - 2 * dir[k][0];
-                                        mem.second.y = j - 2 * dir[k][1];
-                                    }
-                                }
-
-                            } else ++cnt; // 在界内且是我方,计数器+1
-                        } else { // 超界了怎么样
+            if (simuBoard[i][j] == mySide) re(k, 0, 4) { // 四个方向
+                    cnt = 1;
+//                    re(l, 0, 5) { // 循环,查看连子,最多五个连子
+                        while (isInRange(i+cnt*dir[k][0],j+cnt*dir[k][1])&&simuBoard[i+cnt*dir[k][0]][j+cnt*dir[k][1]]==mySide) {
+                            ++cnt; // 在界内且是我方,计数器+1
+                        }
                             if (cnt == 4) {
-                                if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                /*(isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
                                     isInRange(i - 2 * dir[k][0], j - 2 * dir[k][1]) &&
                                     Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY &&
-                                    Board[i - 2 * dir[k][0]][j - 2 * dir[k][1]] == EMPTY) {
-                                    toGo.first.x = i - 1 * dir[k][0];
-                                    toGo.first.y = j - 1 * dir[k][1];
-                                    toGo.second.x = i - 2 * dir[k][0];
-                                    toGo.second.y = j - 2 * dir[k][1];
-                                    return;
+                                    Board[i - 2 * dir[k][0]][j - 2 * dir[k][1]] == EMPTY)*/
+                                if(isAvailable(i,j,dir[k][0],dir[k][1],4)) {
+                                    if (cnt1 >= 2) {
+                                        toGo.first.x = i - 1 * dir[k][0];
+                                        toGo.first.y = j - 1 * dir[k][1];
+                                        toGo.second.x = i - 3 * dir[k][0];
+                                        toGo.second.y = j - 3 * dir[k][1];
+                                        return;
+                                    }
+                                    else if (cnt2 >= 2) {
+                                        toGo.first.x = (i + cnt)* dir[k][0];
+                                        toGo.first.y = (i + cnt) * dir[k][1];
+                                        toGo.second.x = (i + cnt+1) * dir[k][0];
+                                        toGo.second.y = (i + cnt+1) * dir[k][1];
+                                        return;
+                                    }
+                                    else {
+                                        toGo.first.x = i - 1 * dir[k][0];
+                                        toGo.first.y = j - 1 * dir[k][1];
+                                        toGo.second.x = (i + cnt) * dir[k][0];
+                                        toGo.second.y = (i + cnt) * dir[k][1];
+                                        return;
+                                    }
                                 }
-
                             }
                             if (cnt == 5) {
-                                if (isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
-                                    Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY) {
-                                    toGo.first.x = i - 1 * dir[k][0];
-                                    toGo.first.y = j - 1 * dir[k][1];
-                                    return;
+                                /*(isInRange(i - 1 * dir[k][0], j - 1 * dir[k][1]) &&
+                                    Board[i - 1 * dir[k][0]][j - 1 * dir[k][1]] == EMPTY)*/
+                                if(isAvailable(i, j, dir[k][0], dir[k][1], 5))  {
+                                    if(cnt1>0) {
+                                        toGo.first.x = i - 1 * dir[k][0];
+                                        toGo.first.y = j - 1 * dir[k][1];
+                                        return;
+                                    }
+                                    else {
+                                        toGo.first.x = (i+cnt) * dir[k][0];
+                                        toGo.first.y = (i+cnt) * dir[k][1];
+                                        return;
+                                    }
                                 }
                             }
-                            if (isAvailable(i, j, dir[k][0], dir[k][1], cnt)) {
-                                if (cnt > maxConnect) {
-                                    maxConnect = cnt;
-                                    mem.first.x = i - 1 * dir[k][0];
-                                    mem.first.y = j - 1 * dir[k][1];
-                                    mem.second.x = i - 2 * dir[k][0];
-                                    mem.second.y = j - 2 * dir[k][1];
-                                }
+                } // 查我方必胜
+            if(simuBoard[i][j] == 1-mySide) { // 发现敌方
+                re(k,0,4) {
+                    cnt = 0;
+                    while (isInRange(i+cnt*dir[k][0],j+cnt*dir[k][1])&&simuBoard[i+cnt*dir[k][0]][j+cnt*dir[k][1]]==1-mySide) {
+                        ++cnt; // 在界内且是我方,计数器+1
+                    }
+                    if(isAvailable(i, j, dir[k][0], dir[k][1], cnt)&&cnt>=4){
+                        if(Board[i-dir[k][0]][j-dir[k][1]]==EMPTY&&isInRange(i-dir[k][0],i-dir[k][1])) {
+                            toGo.first.x = i-dir[k][0];
+                            toGo.first.y = i-dir[k][1];
+                            ++numToBlock ;
+                        }
+                        if(Board[i+cnt*dir[k][0]][j+cnt*dir[k][1]]==EMPTY&&isInRange(i+cnt*dir[k][0],j+cnt*dir[k][1])) {
+                            ++numToBlock;
+                            if(numToBlock == 2) {
+                                toGo.second.x = i+cnt*dir[k][0];
+                                toGo.second.y = j+cnt*dir[k][1];
+                                return;
+                            } else if(numToBlock == 1) {
+                                toGo.first.x = i-dir[k][0];
+                                toGo.first.y = i-dir[k][1];
                             }
                         }
                     }
+
                 }
-            } //else if (simuBoard[i][j] == 1 - side) {
-//                re(k, 0, 4) {
-//                    cnt = 0;
-//                    re(l, 0, 6) {
-//                        if (isInRange(i + l * dir[k][0], j + l * dir[k][1])) {
-//                            if (simuBoard[i + l * dir[k][0]][j + l * dir[k][1]] != 1 - side) {
-//                                break;
-//                            } else ++cnt;
-//                        } else break;
-//
-//                    }
-//                }
-//            }
-        }
-    copyStep(toGo,mem);
+            }
+            if (simuBoard[i][j] == mySide) re(k, 0, 4) { // 四个方向
+                    cnt = 1;
+                    while (isInRange(i+cnt*dir[k][0],j+cnt*dir[k][1])&&simuBoard[i+cnt*dir[k][0]][j+cnt*dir[k][1]]==mySide) {
+                        ++cnt; // 在界内且是我方,计数器+1
+                    }
+            if (isAvailable(i, j, dir[k][0], dir[k][1], cnt)) {
+                if(numToBlock==0) {
+                    if (cnt1 >= 2) {
+                        toGo.first.x = i - 1 * dir[k][0];
+                        toGo.first.y = j - 1 * dir[k][1];
+                        toGo.second.x = i - 2 * dir[k][0];
+                        toGo.second.y = j - 2 * dir[k][1];
+                        return;
+                    }
+                    if (cnt2 >= 2) {
+                        toGo.first.x = (i + cnt) * dir[k][0];
+                        toGo.first.y = (i + cnt) * dir[k][1];
+                        toGo.second.x = (i + cnt + 1) * dir[k][0];
+                        toGo.second.y = (i + cnt + 1) * dir[k][1];
+                        return;
+                    } else {
+                        toGo.first.x = i - 1 * dir[k][0];
+                        toGo.first.y = j - 1 * dir[k][1];
+                        toGo.second.x = (i + cnt) * dir[k][0];
+                        toGo.second.y = (i + cnt) * dir[k][1];
+                        return;
+                    }
+                }
+                else{
+                    if (cnt1 >= 1) {
+                        toGo.second.x = i - dir[k][0];
+                        toGo.second.y = j - dir[k][1];
+                        return;
+                }
+                    else{
+                        toGo.second.x = i +cnt* dir[k][0];
+                        toGo.second.y = j +cnt* dir[k][1];
+                    }
+                }
+
+            }
+            }
+            } // 遍历结束
+//    if(numToBlock == 0) {
+//        copyStep(toGo,mem);
+//    } else {
+//        toGo.second.x = mem.first.x;
+//        toGo.second.y = mem.second.y;
+//    }
     return;
 
 }
@@ -911,7 +964,7 @@ int main()
             step.second.x=message[2]-'A';		step.second.y=message[3]-'A';
             //处理对手行棋
             Board[step.first.x][step.first.y] = 1 - computerSide;
-            if(!(step.second.x==-1 && step.second.y==-1)) Board[step.second.x][step.second.y] = 1 - computerSide;
+            Board[step.second.x][step.second.y] = 1 - computerSide;
 
             /**********************************************************************************************************/
             /***生成落子的坐标，保存在step结构中，第1子下在(step.first.x,step.first.y)，第2子下在(step.first.x,step.first.y)*****/
@@ -920,7 +973,7 @@ int main()
             //vector<Step>* candidate = generateMove(computerSide,Board);
             //copyStep(step,(*candidate)[0]);
             //aGoodStep(1);
-            findStep();
+            findStep(); //更新toGo
             copyStep(step,toGo);
             //生成第1子落子位置step.first.x和step.first.y
 //            int x, y;
