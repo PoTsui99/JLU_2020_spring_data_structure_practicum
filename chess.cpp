@@ -282,7 +282,6 @@ int compare8(int path[8])
     //眠二检测完毕
     return -1;
 }
-
 void numberReturn(int simuBoard[19][19], int color, int CS[8])
 {
     int number = 0;
@@ -393,8 +392,15 @@ int evaluate(int computerside, int myBoard[19][19])//整体局面估分
 {
     auto simuBoard = new int[19][19];
     memcpy(simuBoard,myBoard,sizeof(int[19][19]));
+    int _flag = whoWin(computerside,simuBoard);
+    if(_flag == 1){
+        return 5000000;
+    }
+    else if(_flag == -1){
+        return -5000000;
+    }
     int CS[8] = { 0,0,0,0,0,0,0,0 };
-    int value[8] = { 1000000,100000,80000,10000,5000,1000,100,10 };
+    int value[8] = { 10000000,10000000,500000,70000,9000,1100,550,60 };
     int path[7] = { 0,0,0,0,0,0,0 };
     int path6[6] = { 0,0,0,0,0,0 };
     for (int i = 0; i < 19; i++)
@@ -795,7 +801,9 @@ int main()
             /**************************************在下方填充代码，并替换我的示例代码*****************************************/
 
             vector<Step>* candidate = generateMove(computerSide,Board);
-            copyStep(step,(*candidate)[0]);
+//            copyStep(step,(*candidate)[0]);
+            aGoodStep(1);
+            copyStep(step,toGo);
             fout << "generateMove的大小为:" << (*candidate).size() << endl;
             //生成第1子落子位置step.first.x和step.first.y
 //            int x, y;
